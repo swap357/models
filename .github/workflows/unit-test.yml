@@ -1,0 +1,22 @@
+name: Unit Test
+on: pull_request
+jobs:
+  unit-test:
+    container:
+      image: python:3.8-alpine
+      credentials:
+         username: imzbot
+         password: ${{ secrets.DOCKER_TOKEN }}
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tox and any other packages
+        run: python -m pip install tox
+      - name: Run Style Test
+        run: tox -e py3-flake8
+      - name: Run Unit Test
+        run: tox py3-py.test
