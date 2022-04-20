@@ -81,11 +81,10 @@ export MODEL_DIR=$(pwd)
 
 # Clone the Transformers repo in the BERT large inference directory
 cd quickstart/language_modeling/pytorch/bert_large/inference/cpu
-git clone https://github.com/huggingface/transformers.git
+git clone https://github.com/huggingface/transformers.git -b v3.0.2
 cd transformers
-git checkout v3.0.2
 git apply ../enable_ipex_for_squad.diff
-pip install -e ./
+python3 setup.py bdist_wheel && python3 -m pip install dist/transformers*.whl
 
 # Env vars
 export FINETUNED_MODEL=<path to the fine tuned model>

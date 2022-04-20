@@ -8,7 +8,7 @@ index 2bd4e90ff..cf28e434a 100644
  import timeit
 +import time
 +import sys
-+import threading 
++import threading
  
  import numpy as np
  import torch
@@ -63,25 +63,25 @@ index 2bd4e90ff..cf28e434a 100644
 +        # enable fusion path work(need to run two interation).
 +        with torch.no_grad():
 +            y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
-+            y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor) 
-+            #dumpy_tensor = torch.ones((128, 384), dtype=torch.long)
-+            #y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
-+            #dumpy_tensor = torch.ones((81, 384), dtype=torch.long)
-+            #y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
-+            #print("############################################")
++            y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++            # dumpy_tensor = torch.ones((128, 384), dtype=torch.long)
++            # y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++            # dumpy_tensor = torch.ones((81, 384), dtype=torch.long)
++            # y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++            # print("############################################")
 +    elif args.bf16:
 +        model = ipex.optimize(model, dtype=torch.bfloat16)
 +        with torch.cpu.amp.autocast(),torch.no_grad():
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
 +            model = torch.jit.freeze(model)
-+            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
++            # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 +            print(model.graph)
 +    elif args.use_jit:
 +        with torch.no_grad():
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
-+            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True)) 
++            # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 +            model = torch.jit.freeze(model)
-+    return model 
++    return model
 +
 +def benchmark_evaluate(args, model, eval_dataloader):
 +    steps_per_epoch = len(eval_dataloader)
@@ -90,25 +90,25 @@ index 2bd4e90ff..cf28e434a 100644
 +    print('Evaluating BERT: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
 +    total_time = 0
 +    i = 0;
-+    #with torch.profiler.profile(
-+    #        activities=[
-+    #            torch.profiler.ProfilerActivity.CPU],
++    # with torch.profiler.profile(
++    #         activities=[
++    #             torch.profiler.ProfilerActivity.CPU],
 +
-+    #        schedule=torch.profiler.schedule(
-+    #            wait=1,
-+    #            warmup=9,
-+    #            active=5),
-+    #        #on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/bert_bf16'),#trace_handler
-+    #        on_trace_ready=trace_handler#torch.profiler.tensorboard_trace_handler('./log/bert_bf16')
-+    #        # used when outputting for tensorboard
-+    #        ) as prof:
++    #         schedule=torch.profiler.schedule(
++    #             wait=1,
++    #             warmup=9,
++    #             active=5),
++    #         # on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/bert_bf16'),  # trace_handler
++    #         on_trace_ready=trace_handler#torch.profiler.tensorboard_trace_handler('./log/bert_bf16')
++    #         # used when outputting for tensorboard
++    #         ) as prof:
 +
 +    with tqdm(total=total_steps, desc="Evaluating") as pbar:
 +        for epoch in range(test_epoches + 1):
 +            for it, batch in enumerate(eval_dataloader):
 +                if epoch * steps_per_epoch + it >= total_steps:
 +                    throughput = args.eval_batch_size * args.perf_run_iters / total_time
-+                    print("Throughput: {:.3f} sentence/s".format(throughput))     
++                    print("Throughput: {:.3f} sentence/s".format(throughput))
 +                    break
 +                with torch.no_grad():
 +                    inputs = {
@@ -117,7 +117,7 @@ index 2bd4e90ff..cf28e434a 100644
 +                        "token_type_ids": batch[2],
 +                    }
 +                    time_start = time.time()
-+                    outputs = model(**inputs)          
++                    outputs = model(**inputs)
 +                    #prof.step()
 +                    time_end = time.time()
 +                    if epoch * steps_per_epoch + it > args.perf_begin_iter:
@@ -130,7 +130,7 @@ index 2bd4e90ff..cf28e434a 100644
      if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
          os.makedirs(args.output_dir)
 -
-+ 
++
      args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
  
 +    model = wrap_model(model, args)
@@ -138,7 +138,7 @@ index 2bd4e90ff..cf28e434a 100644
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
 -
-+      
++
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
@@ -147,7 +147,7 @@ index 2bd4e90ff..cf28e434a 100644
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
 -
-+    
++
 +    if args.do_calibration:
 +        conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)
 +        for step, batch in enumerate(eval_dataloader):
@@ -174,12 +174,12 @@ index 2bd4e90ff..cf28e434a 100644
 +            for t in threads:
 +                t.join()
 +        else:
-+            benchmark_evaluate(args, model, eval_dataloader)        
++            benchmark_evaluate(args, model, eval_dataloader)
 +        exit()
      all_results = []
      start_time = timeit.default_timer()
 -
-+    
++
      for batch in tqdm(eval_dataloader, desc="Evaluating"):
          model.eval()
          batch = tuple(t.to(args.device) for t in batch)
@@ -204,7 +204,7 @@ index 2bd4e90ff..cf28e434a 100644
 +                        help='use llga int8 in pytorch jit model')
 +    parser.add_argument('--int8_fp32', dest='int8_fp32', action='store_true',
 +                        help='use int8 fp32 mix precision')
-+    parser.add_argument("--int8_config", type=str, default="config.json", 
++    parser.add_argument("--int8_config", type=str, default="config.json",
 +                        help="quantization config file for int8 mode")
 +    parser.add_argument("--do_calibration", action='store_true',
 +                        help="Enable calibration process")
@@ -241,4 +241,4 @@ index 23d25cfa0..b281147af 100644
 +                attention_mask = attention_mask.to(attention_scores.dtype)
              # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
              attention_scores = attention_scores + attention_mask
- 
+
