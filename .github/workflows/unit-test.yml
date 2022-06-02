@@ -5,7 +5,7 @@ jobs:
     container:
       image: python:3.8
       credentials:
-         username: imzbot
+         username: ${{ secrets.DOCKER_USER }}
          password: ${{ secrets.DOCKER_TOKEN }}
     runs-on: self-hosted
     steps:
