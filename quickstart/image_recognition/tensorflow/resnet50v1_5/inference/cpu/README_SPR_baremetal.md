@@ -23,7 +23,11 @@ source venv-tf/bin/activate
 pip install intel-tensorflow-avx512==2.10.dev202230
 ```
 
-* Clone [Intel Model Zoo repository](https://github.com/IntelAI/models) if you haven't already cloned it.
+* Clone [Intel Model Zoo repository](https://github.com/IntelAI/models) if you haven't already cloned it, and checkout `spr-launch-public` branch:
+```
+git clone https://github.com/IntelAI/models.git
+git checkout spr-launch-public
+```
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
