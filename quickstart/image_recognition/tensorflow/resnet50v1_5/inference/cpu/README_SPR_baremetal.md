@@ -109,7 +109,7 @@ export PRETRAINED_MODEL=<path to the downloaded fp32 pretrained model file>
 ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime.sh
 ```
 
-### Run real time inference (Latency with weight sharing enabled):
+### Run real time int8 and bfloat16 inference (Latency with weight sharing enabled):
 ```
 export PRECISION=<int8 or bfloat16 are supported>
 export OUTPUT_DIR=<directory where log files will be written>
