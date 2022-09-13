@@ -56,23 +56,17 @@ if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-<<<<<<< HEAD
-BATCH_SIZE="256"
-=======
 # System envirables
 export NOINSTALL=True
 export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1
 
->>>>>>> d9014e2a1 (Update TF ResNet50v1.5 inference for SPR (baremetal) (#749))
 MODE="inference"
 CORES_PER_INSTANCE="socket"
 # Get number of cores per socket line from lscpu
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
-<<<<<<< HEAD
-=======
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [[ $PRECISION == "fp32" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"64"}"
@@ -104,7 +98,6 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
->>>>>>> d9014e2a1 (Update TF ResNet50v1.5 inference for SPR (baremetal) (#749))
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

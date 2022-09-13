@@ -60,9 +60,6 @@ fi
 export OMP_NUM_THREADS=4
 
 MODE="inference"
-<<<<<<< HEAD
-BATCH_SIZE="1"
-=======
 
 # If batch size env is not set, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"1"}"
@@ -98,7 +95,6 @@ export TF_USE_SYSTEM_ALLOCATOR=1
 
 # clean up old log files if found
 rm -rf ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*
->>>>>>> d9014e2a1 (Update TF ResNet50v1.5 inference for SPR (baremetal) (#749))
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr

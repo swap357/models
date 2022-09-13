@@ -62,14 +62,9 @@ export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1
 
 MODE="inference"
-<<<<<<< HEAD
-BATCH_SIZE="100"
-=======
-
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"100"}"
 
->>>>>>> d9014e2a1 (Update TF ResNet50v1.5 inference for SPR (baremetal) (#749))
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

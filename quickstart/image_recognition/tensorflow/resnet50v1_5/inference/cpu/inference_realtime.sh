@@ -59,9 +59,6 @@ fi
 MODE="inference"
 # Use 4core/instance 
 CORES_PER_INSTANCE="4"
-<<<<<<< HEAD
-BATCH_SIZE="1"
-=======
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"1"}"
@@ -86,7 +83,6 @@ export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1 
 export KMP_BLOCKTIME=1 
 export TF_USE_SYSTEM_ALLOCATOR=1
->>>>>>> d9014e2a1 (Update TF ResNet50v1.5 inference for SPR (baremetal) (#749))
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
