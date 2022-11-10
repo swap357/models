@@ -79,7 +79,7 @@ For information on running more advanced use cases using the workload containers
 | Image Recognition       | [Wide ResNet-50-2](https://arxiv.org/pdf/1605.07146.pdf)   | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md) |
 | Image Recognition       | [Wide ResNet-101-2](https://arxiv.org/pdf/1605.07146.pdf)  | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md) |
 | Language Modeling       | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) |
-| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Inference | [FP32 Int8 BFloat16](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
+| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Inference | [FP16 FP32 Int8 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
 | Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Training  | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md) |
 | Language Modeling       | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/README.md) |
 | Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/rnnt/inference/cpu/README.md) |
