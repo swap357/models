@@ -108,8 +108,8 @@ Instructions available to run [TensorFlow ResNet50 v1.5 inference](/quickstart/i
 | [RetinaNet ResNet-50 FPN](https://arxiv.org/abs/1708.02002)   | PyTorch | Inference  | [FP32 BFloat16](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md#datasets) |
 | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | PyTorch | Inference  | [FP32 Int8 BFloat16](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md#datasets) |
 | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | PyTorch | Training   | [FP32 BFloat16](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md#datasets) |
-| [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)| Pytorch | Inference | [dGPU Int8](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md#datasets) |
-| [Yolo V4](https://arxiv.org/pdf/1704.04861.pdf)| Pytorch | Inference | [dGPU Int8](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md#datasets) |
+| [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | [dGPU Int8](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md#datasets) |
+| [Yolo V4](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | [dGPU Int8](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md#datasets) |
 
 
 ### Recommendation
