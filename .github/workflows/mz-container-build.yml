@@ -16,8 +16,10 @@ on:
         type: string
 
 jobs:
-  build-push-container:
+  build:
     runs-on: [self-hosted, Linux, X64]
+    outputs:
+      docker_images: ${{ steps.dockerfile_outputs.outputs.TAGS }}
     steps:
       - name: Cleanup
         run: |
@@ -40,6 +42,17 @@ jobs:
       #   with:
       #     name: Container Artifacts
       #     path: ./output/*
+      - name: Save Dockerfiles
+        id: dockerfile_outputs
+        run: echo "::set-output name=TAGS::$(docker images --format "{{.Tag}}" --filter=reference=*model-zoo* | jq -R -s -c 'split("\n")[:-1]')"
+  push-to-caas:
+    needs: [build]
+    runs-on: [self-hosted, Linux, X64]
+    strategy:
+      matrix:
+        docker_images: ${{ fromJson(needs.build.outputs.docker_images) }}
+    steps:
+      - uses: actions/checkout@v3
       - uses: docker/login-action@v2
         with:
           registry: amr-registry.caas.intel.com
@@ -47,10 +60,40 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Push to CAAS
         run: |
-          export dockerfiles=$(docker images --format "{{.Repository}}:{{.Tag}}")
-          for dockerfile in $dockerfiles; do if [[ "$dockerfile" == *"model-zoo"* ]]; then tag_value=${dockerfile#*:};
-            docker tag model-zoo:${tag_value} amr-registry.caas.intel.com/aiops/mlops-ci:B-${{github.run_number}}-${tag_value};
-            docker push amr-registry.caas.intel.com/aiops/mlops-ci:B-${{github.run_number}}-${tag_value}; fi; done
+          docker tag model-zoo:${{ matrix.docker_images }} amr-registry.caas.intel.com/aiops/mlops-ci:B-${{github.run_number}}-${{ matrix.docker_images }}
+          docker push amr-registry.caas.intel.com/aiops/mlops-ci:B-${{github.run_number}}-${{ matrix.docker_images }}
+  scan:
+    needs: [build, push-to-caas]
+    runs-on: [self-hosted, Linux, X64]
+    strategy:
+      matrix:
+        docker_images: ${{ fromJson(needs.build.outputs.docker_images) }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: SNYK Scan monitor
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_API: https://snyk.devtools.intel.com/api
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          image: amr-registry.caas.intel.com/aiops/mlops-ci:B-${{github.run_number}}-${{ matrix.docker_images }}
+          json: true
+      - name: SNYK Scan
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_API: https://snyk.devtools.intel.com/api
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: amr-registry.caas.intel.com/aiops/mlops-ci:B-${{github.run_number}}-${{ matrix.docker_images }}
+          json: false
+          args: --json-file-output=B-${{github.run_number}}-${{ matrix.docker_images }}.json
+        continue-on-error: true
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Container Artifacts
+      #     path: ./B-${{github.run_number}}-${{ matrix.docker_images }}.json
       - name: Cleanup images
         run: |
+          cat B-${{github.run_number}}-${{ matrix.docker_images }}.json
           docker images | grep "mlops-ci" | awk '{print $3}' | xargs docker rmi --force || echo "No images to remove"
