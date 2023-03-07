@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [workflow_dispatch]
 jobs:
   job1:
-    runs-on: [self-hosted, Linux, X64, tf_dataset, pytorch, k8-runners]
+    runs-on: [test_multiple_jobs]
     steps:
       - name: Pull Image from amr-registry-pre.caas.intel.com
         run: |
