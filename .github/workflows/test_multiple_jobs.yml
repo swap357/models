@@ -9,35 +9,35 @@ jobs:
         run: |
           docker pull amr-registry-pre.caas.intel.com/caas/rancher-hello-world
   job2:
-    runs-on: [self-hosted, Linux, X64, tf_dataset, pytorch, k8-runners]
+    runs-on: [test_multiple_jobs]
     steps:
       - name: Pull Image from ger-registry-pre.caas.intel.com
         run: |
           docker pull ger-registry-pre.caas.intel.com/caas/nginx@sha256:3936fb3946790d711a68c58be93628e43cbca72439079e16d154b5db216b58da
 
   job3:
-    runs-on: [self-hosted, Linux, X64, tf_dataset, pytorch, k8-runners]
+    runs-on: [test_multiple_jobs]
     steps:
       - name: Pull Image from amr-registry.caas.intel.com
         run: |
           docker pull amr-registry.caas.intel.com/caas/alpine
 
   job4:
-    runs-on: [self-hosted, Linux, X64, tf_dataset, pytorch, k8-runners]
+    runs-on: [test_multiple_jobs]
     steps:
       - name: Pull Image from ger-registry.caas.intel.com
         run: |
           docker pull ger-registry.caas.intel.com/caas/alpine@sha256:e7d88de73db3d3fd9b2d63aa7f447a10fd0220b7cbf39803c803f2af9ba256b3
 
   job5:
-    runs-on: [self-hosted, Linux, X64, tf_dataset, pytorch, k8-runners]
+    runs-on: [test_multiple_jobs]
     steps:
       - name: Pull Image from ccr-registry.caas.intel.com
         run: |
           docker pull ccr-registry.caas.intel.com/caas/alpine@sha256:e7d88de73db3d3fd9b2d63aa7f447a10fd0220b7cbf39803c803f2af9ba256b3
 
   job6:
-    runs-on: [self-hosted, Linux, X64, tf_dataset, pytorch, k8-runners]
+    runs-on: [test_multiple_jobs]
     steps:
       - name: Display Available Images
         run: |
