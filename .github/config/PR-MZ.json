@@ -1,0 +1,32 @@
+{
+  "data":
+    [{
+      "workload": "resnet50v1.5-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.11.0",
+      "test":
+        {
+          "script": "inference.sh",
+          "precision": ["int8", "fp32", "bfloat16"],
+          "batch_size": 1,
+          "dataset": "",
+          "benchmark": "latency",
+          "benchmark_threshold": [6, 6.5, 7]
+        }
+    },
+    {
+      "workload": "mobilenetv1-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.11.0",
+      "test":
+        {
+          "script": "inference.sh",
+          "precision": ["int8", "fp32", "bfloat16"],
+          "batch_size": 32,
+          "dataset": "",
+          "benchmark": "throughput",
+          "benchmark_threshold": [650, 625, 600]
+        }
+      }],
+  "scan_type": ["bandit"]
+}

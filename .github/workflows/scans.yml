@@ -1,0 +1,30 @@
+name: Scan WFs
+on:
+  workflow_call:
+    inputs:
+      scan_type:
+        description: 'Enter Scan type to run:'
+        required: true
+        type: string
+env:
+  SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL: True
+jobs:
+  scan-snyk:
+    if: ${{ inputs.scan_type == 'snyk' }}
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Snyk.yml@gda/pr-poc
+    with:
+      repos: frameworks.ai.models.intel-models
+      ref: develop
+      scan_type: monitor
+      snyk_org: iags_mlp
+    secrets:
+      SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-bandit:
+    if: ${{ inputs.scan_type == 'bandit' }}
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Bandit.yml@one-ci-cd
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: develop
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
