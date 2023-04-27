@@ -1,0 +1,150 @@
+name: Data Connector Validation
+on:
+  pull_request:
+    branches: [data_connector]
+    types: [opened, reopened]
+jobs:
+  unit-tests:
+    container:      
+      image: amr-registry.caas.intel.com/aiops/data_connector_dev:v1.0.0
+      options: --privileged
+    runs-on: [ self-hosted, data_connector ]
+    defaults:
+      run:
+        shell: bash
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ["3.8", "3.9", "3.10"]
+    steps:
+    - name: Sandbox Repo Checkout
+      uses: actions/checkout@v3
+      with:
+        repository: "https://github.com/IntelAI/models"
+        submodules: "true"
+        path: "repo"
+    - name: Creating Virtual Env for Unit Test
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda create --name venv pip python=${{ matrix.python_version }} -c conda-forge --yes --quiet
+        conda activate venv
+        pip install --upgrade pip wheel setuptools
+        pip install -r ./repo/datasets/data_connector/requirements-test.txt
+        pip list
+        pip check
+    - name: Dependencies Test
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        conda compare -n venv repo/datasets/data_connector/requirements.txt
+        pip check
+    - name: Executing AWS Unit Tests
+      if: success()
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        cd repo/datasets
+        python${{ matrix.python_version }} -m pytest data_connector/tests/aws
+        mv test_data/out_report.xml test_data/out_report_aws_${{ matrix.python_version }}.xml
+        cd ..
+    - name: Executing GCP Unit Tests
+      if: success() || failure()
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        cd repo/datasets
+        python${{ matrix.python_version }} -m pytest data_connector/tests/gcp
+        mv test_data/out_report.xml test_data/out_report_gcp_${{ matrix.python_version }}.xml
+        cd ..
+    - name: Executing Azure Unit Tests
+      if: success() || failure()
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        cd repo/datasets
+        python${{ matrix.python_version }} -m pytest data_connector/tests/azure
+        mv test_data/out_report.xml test_data/out_report_azure_${{ matrix.python_version }}.xml
+        cd ..
+    - name: Upload Unit Tests Artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: unit-tests-results-artifacts
+        path: repo/datasets/test_data/*
+  functional-tests:
+    needs: [unit-tests]
+    container:      
+      image: amr-registry.caas.intel.com/aiops/data_connector_dev:v1.0.0
+      options: --privileged
+    runs-on: [ self-hosted, data_connector ]
+    defaults:
+      run:
+        shell: bash
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ["3.8", "3.9", "3.10"]
+    steps:
+    - name: Sandbox Repo Checkout
+      uses: actions/checkout@v3
+      with:
+        repository: "https://github.com/IntelAI/models"
+        submodules: "true"
+        path: "repo"
+    - name: Creating Virtual Env for Functional Test
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda create --name venv pip python=${{ matrix.python_version }} -c conda-forge --yes --quiet
+        conda activate venv
+        pip install --upgrade pip wheel setuptools
+        pip install ./repo/datasets/data_connector/
+    - name: Dependencies Test
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        conda compare -n venv repo/datasets/data_connector/requirements.txt
+        pip check
+    - name: Import Data Connector Test
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        python -c 'import data_connector'
+    - name: Executing AWS Functional Test
+      if: success()
+      env:
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        touch file_test.txt
+        echo "This is a test!" > file_test.txt
+        conda list
+        python repo/datasets/data_connector/samples/aws/functional_test.py $AWS_BUCKET_NAME file_test.txt
+        cat file_test_2.txt
+        rm file_test*
+    - name: Executing GCP Functional Test
+      if: success() || failure()
+      run: |
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate venv
+        touch credentials.json
+        JSON_STRING="{
+          \"type\": \"service_account\",
+          \"project_id\": \"intel-optimized-tensorflow\",
+          \"private_key_id\": \"${{ secrets.GCP_PRIVATE_KEY_ID }}\",
+          \"private_key\": \"${{ secrets.GCP_PRIVATE_KEY }}\",
+          \"client_email\": \"${{ secrets.GCP_CLIENT_EMAIL }}\",
+          \"client_id\": \"${{ secrets.GCP_CLIENT_ID }}\",
+          \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",
+          \"token_uri\": \"https://oauth2.googleapis.com/token\",
+          \"auth_provider_x509_cert_url\": \"${{ secrets.GCP_AUTH_PROVIDER_URL }}\",
+          \"client_x509_cert_url\": \"${{ secrets.GCP_CLIENT_URL }}\"
+        }"
+        echo "${JSON_STRING}" > credentials.json
+        python repo/datasets/data_connector/samples/gcp/storage.py -p intel-optimized-tensorflow -c credentials.json
+        python repo/datasets/data_connector/samples/gcp/bigquery.py -p intel-optimized-tensorflow -c credentials.json
+        rm credentials.json
