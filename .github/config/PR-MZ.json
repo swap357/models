@@ -11,7 +11,23 @@
           "batch_size": 1,
           "dataset": "",
           "benchmark": "latency",
-          "benchmark_threshold": [6, 6.5, 7]
+          "benchmark_threshold": [6, 6.5, 7],
+          "tolerance": 0.015
+        }
+    },
+    {
+      "workload": "resnet50v1.5-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.11.0",
+      "test":
+        {
+          "script": "accuracy.sh",
+          "precision": ["int8", "fp32", "bfloat16"],
+          "batch_size": 1,
+          "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
+          "benchmark": "accuracy",
+          "benchmark_threshold": [0.9, 0.9, 0.9],
+          "tolerance": 0.015
         }
     },
     {
@@ -25,8 +41,8 @@
           "batch_size": 32,
           "dataset": "",
           "benchmark": "throughput",
-          "benchmark_threshold": [650, 625, 600]
+          "benchmark_threshold": [650, 625, 600],
+          "tolerance": 0.015
         }
-      }],
-  "scan_type": ["bandit"]
+      }]
 }

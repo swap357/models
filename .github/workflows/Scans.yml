@@ -1,0 +1,35 @@
+name: Scans
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, reopened]
+jobs:
+  scan-snyk:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Snyk.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      ref: develop
+      scan_type: monitor
+      snyk_org: iags_mlp
+    secrets:
+      SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-bandit:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Bandit.yml@one-ci-cd
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: develop
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-coverity:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Coverity.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: develop
+      projectType: python
+      url: https://coverityent.devtools.intel.com/prod8
+      stream: model_zoo_first_test
+    secrets:
+      USER: tf_qa_prod
+      PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}
