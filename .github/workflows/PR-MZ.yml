@@ -2,7 +2,6 @@ name: MZ Pull Request Tests
 on:
   pull_request:
     branches: [develop]
-    types: [opened, reopened]
 jobs:
   setup:
     runs-on: [gasp]

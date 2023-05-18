@@ -45,13 +45,6 @@ on:
         description: 'Enter synk org: (eg- iags_mlp)'
         required: true
         type: string
-    secrets:
-      SNYK_API_TOKEN:
-        description: 'Enter Snyk Api Token:'
-        required: true
-      token:
-        description: 'GITHUB_TOKEN or a repo scoped PAT.'
-        required: true
 jobs:
   get-requiremets:
     runs-on: [ k8-runners ]
@@ -78,29 +71,45 @@ jobs:
       matrix:
         REQS: ${{ fromJson(needs.get-requiremets.outputs.REQUIREMENTS) }}
     steps:
+    - name: Set secrets - Workflow Call
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "SNYK_API_TOKEN=${{ secrets.SNYK_API_TOKEN }}" >> "$GITHUB_ENV"
+        echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
+    - name: Set secrets - Workflow Dispatch
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "SNYK_API_TOKEN=${{ secrets.SNYK_API_TOKEN }}" >> "$GITHUB_ENV"
+        echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
     - name: Checkout
       uses: actions/checkout@v3
       with:
         repository: intel-innersource/${{ inputs.repos }}
         ref: ${{ inputs.ref }}
         submodules: true
-    - name: Run SNYK Scan
+    - name: Set REQ_PATH ENV variable
+      run: echo "REQ_PATH=$(dirname "${{ matrix.REQS }}")" >> "$GITHUB_ENV"
+    - name: Set BASENAME ENV variable
+      run: echo "BASENAME=$(basename ${{ env.REQ_PATH }})" >> "$GITHUB_ENV"
+    - name: Run ${{ env.REQ_PATH }} SNYK Scan
       run: |
         export no_proxy+=',snyk.devtools.intel.com'
-        export REQ_PATH=$(dirname "${{ matrix.REQS }}")
-        docker run -e SNYK_TOKEN=${{ secrets.SNYK_API_TOKEN }} -e SNYK_CFG_ORG=${{ inputs.snyk_org }} -e SNYK_API=https://snyk.devtools.intel.com/api \
+        docker run -e SNYK_TOKEN=${{ env.SNYK_API_TOKEN }} -e SNYK_CFG_ORG=${{ inputs.snyk_org }} -e SNYK_API=https://snyk.devtools.intel.com/api \
           -e http_proxy=${http_proxy} -e https_proxy=${https_proxy} -e no_proxy=${no_proxy} -e HTTP_PROXY=${HTTP_PROXY} \
-            -e HTTPS_PROXY=${HTTPS_PROXY} -e NO_PROXY=${NO_PROXY} -v ${REQ_PATH}:/project --rm \
-              amr-registry.caas.intel.com/aiops/snyk-cli:1.690.0.python-3.9 ${{  inputs.scan_type }} --project-name='${REQ_PATH}'
+            -e HTTPS_PROXY=${HTTPS_PROXY} -e NO_PROXY=${NO_PROXY} -v ${{ env.REQ_PATH }}:/project --rm \
+              amr-registry.caas.intel.com/aiops/snyk-cli:1.690.0.python-3.9 ${{  inputs.scan_type }} --severity-threshold=high \
+                --project-name='${{ env.REQ_PATH }}'
+    - name: Save output file
+      if: success() || failure()
+      run: |
         mkdir snyk-output
-        BASENAME=$(basename ${REQ_PATH})
-        mv ${REQ_PATH}/snyk-result.json ./snyk-output/snyk-result-${BASENAME}.json
+        mv ${{ env.REQ_PATH }}/snyk-result.json ./snyk-output/snyk-result-${{ env.BASENAME }}.json
     - name: Upload SNYK Artifacts
-      if: success()
+      if: success() || failure()
       uses: actions/upload-artifact@v3
       with:
         name: snyk-log
-        path: snyk-output/*
+        path: snyk-output/snyk-result-${{ env.BASENAME }}.json
     - name: Cleanup
-      if: always()
+      if: success() || failure()
       run: rm -rf snyk-output

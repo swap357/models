@@ -65,23 +65,25 @@ on:
         type: string
       stream:
         description: 'Enter coverity stream name:'
-        required: true 
+        required: true
         type: string
-    secrets:
-      USER:
-        description: 'Enter User name for coverity server portal:'
-        required: true 
-      PASSWORD:
-        description: 'Enter passowrd for coverity server portal:'
-        required: true        
-      token:
-        description: 'GITHUB_TOKEN or a repo scoped PAT.'
-        required: true        
 
 jobs:
   scan_coverity:
     runs-on: [ k8-runners ]
     steps:
+    - name: Set secrets - Workflow Call
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "USER=${{ secrets.USER }}" >> "$GITHUB_ENV"
+        echo "PASSWORD=${{ secrets.PASSWORD }}" >> "$GITHUB_ENV"
+        echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
+    - name: Set secrets - Workflow Dispatch
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "USER=tf_qa_prod" >> "$GITHUB_ENV"
+        echo "PASSWORD=${{ secrets.TF_QA_PROD }}" >> "$GITHUB_ENV"
+        echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
     - name: Workspace Initialization
       run: |
         git config --global --add safe.directory ${GITHUB_WORKSPACE}
@@ -89,7 +91,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: intel-innersource/${{inputs.repos}}
-        token: ${{ secrets.token }}
+        token: ${{ env.token }}
         path: code
         ref: ${{inputs.refs}}
     - name: Download and Install coverity
@@ -146,4 +148,4 @@ jobs:
       env: 
         no_proxy: coverityent.devtools.intel.com, intel.com
       run: |
-        cov-commit-defects --dir ${GITHUB_WORKSPACE}/cov_dir --url ${{inputs.url}} --user ${{ secrets.USER }} --password ${{ secrets.PASSWORD }} --stream ${{inputs.stream}}
+        cov-commit-defects --dir ${GITHUB_WORKSPACE}/cov_dir --url ${{inputs.url}} --user ${{ env.USER }} --password ${{ env.PASSWORD }} --stream ${{inputs.stream}}
