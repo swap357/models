@@ -5,6 +5,7 @@ MZ_VERSION=$1
 AIKIT_VERSION=$2
 WORKSPACE=$3
 BRANCH_NAME=$4
+USER=$5
 
 # Create the drop directory
 DROP_NAME="l_model-zoo-${MZ_VERSION}-${AIKIT_VERSION}-drop"
@@ -17,7 +18,7 @@ cp -r l_model-zoo-drop-sample/* ${WORKSPACE}/${DROP_NAME}
 
 # Add the models source code based on the input branch
 cd ${WORKSPACE}/${DROP_NAME}
-git clone https://github.com/intel-innersource/frameworks.ai.models.intel-models.git models
+git clone https://${USER}@github.com/intel-innersource/frameworks.ai.models.intel-models.git models
 cd models
 git checkout ${BRANCH_NAME}
 rm -rf .git .gitignore .github

@@ -44,7 +44,7 @@ jobs:
           # create model zoo bits
 
           cd ${GITHUB_WORKSPACE}/modelzoo/.github/utils/aikit
-          ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE} ${{ inputs.target_branch }}
+          ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE} ${{ inputs.target_branch }} tf_qa_prod:${{ secrets.TF_QA_PROD }}
           # make a drop to artifacory
           cd ${GITHUB_WORKSPACE}
           git clone https://tf_qa_prod:${{ secrets.TF_QA_PROD }}@github.com/intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool.git oneapi_drop_tool
