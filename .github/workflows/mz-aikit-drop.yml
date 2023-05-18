@@ -3,18 +3,32 @@ name: Model zoo drop for AIKit
 on:
   workflow_dispatch:
     inputs:
-      BRANCH_NAME: 'develop'
+      target_branch:
         description: 'Model zoo branch name'
+        default: develop
         required: true
-      MZ_VERSION:
+        type: string
+      mz_version:
         description: 'Model zoo version'
+        default: '2.11.0'
         required: true
-      AIKIT_VERSION: '2023.2.0'
+        type: string
+      aikit_release:
         description: 'Target AIKit version'
+        default: '2023.2.0'
         required: true
+        type: string
 jobs:
-  execute_commands:
-    runs-on: ubuntu-latest
+  aikit_drop:
+    runs-on: [ gasp ]
+    container:
+      image: python:3.9
+      env:
+        http_proxy: ${{ secrets.HTTP_PROXY }}
+        https_proxy: ${{ secrets.HTTPS_PROXY }}
+        no_proxy: ${{ secrets.NO_PROXY }}
+      options: --privileged
+    continue-on-error: true
 
     steps:
       - name: Checkout Repository
@@ -23,7 +37,7 @@ jobs:
           repository: intel-innersource/frameworks.ai.models.intel-models
           token: ${{ secrets.GITHUB_TOKEN }}
           path: modelzoo
-          ref: ${{inputs.BRANCH_NAME}}
+          ref: ${{inputs.target_branch}}
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
@@ -37,9 +51,9 @@ jobs:
           # create model zoo bits
 
           cd ${GITHUB_WORKSPACE}/modelzoo/.github/utils/aikit
-          ./create_mz_bits.sh ${{ inputs.MZ_VERSION }} ${{ inputs.AIKIT_VERSION }} ${GITHUB_WORKSPACE} ${{ inputs.BRANCH_NAME }}
+          ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE} ${{ inputs.target_branch }}
           # make a drop to artifacory
           cd ${GITHUB_WORKSPACE}/oneapi_drop_tool
           python -m pip install -r requirements.txt
-          # python3 cdt.py --user=tf_qa_prod --password=${{ secrets.TF_QA_PROD }} drop -p MZ -r ${{inputs.AIKIT_VERSION}} -c l_drop -cd ${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.MZ_VERSION }}-${{ inputs.AIKIT_VERSION }}-drop/ -b ${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.MZ_VERSION }}-${{ inputs.AIKIT_VERSION }}-drop/boms/l_modelzoo.txt
+          # python cdt.py --user=tf_qa_prod --password=${{ secrets.TF_QA_PROD }} drop -p MZ -r ${{inputs.aikit_release}} -c l_drop -cd ${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.mz_version }}-${{ inputs.aikit_release }}-drop/ -b ${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.mz_version }}-${{ inputs.aikit_release }}-drop/boms/l_modelzoo.txt
 
