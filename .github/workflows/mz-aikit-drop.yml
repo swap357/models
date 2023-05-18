@@ -44,6 +44,7 @@ jobs:
           repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
           token: ${{ secrets.GITHUB_TOKEN }}
           path: oneapi_drop_tool
+          ref: master
           submodules: true
 
       - name: Execute Bash Commands
