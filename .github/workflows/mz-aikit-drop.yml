@@ -1,0 +1,45 @@
+name: Model zoo drop for AIKit
+
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH_NAME: 'develop'
+        description: 'Model zoo branch name'
+        required: true
+      MZ_VERSION:
+        description: 'Model zoo version'
+        required: true
+      AIKIT_VERSION: '2023.2.0'
+        description: 'Target AIKit version'
+        required: true
+jobs:
+  execute_commands:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          repository: intel-innersource/frameworks.ai.models.intel-models
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: modelzoo
+          ref: ${{inputs.BRANCH_NAME}}
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: oneapi_drop_tool
+          submodules: true
+
+      - name: Execute Bash Commands
+        run: |
+          # create model zoo bits
+
+          cd ${GITHUB_WORKSPACE}/modelzoo/.github/utils/aikit
+          ./create_mz_bits.sh ${{ inputs.MZ_VERSION }} ${{ inputs.AIKIT_VERSION }} ${GITHUB_WORKSPACE} ${{ inputs.BRANCH_NAME }}
+          # make a drop to artifacory
+          cd ${GITHUB_WORKSPACE}/oneapi_drop_tool
+          python -m pip install -r requirements.txt
+          # python3 cdt.py --user=tf_qa_prod --password=${{ secrets.TF_QA_PROD }} drop -p MZ -r ${{inputs.AIKIT_VERSION}} -c l_drop -cd ${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.MZ_VERSION }}-${{ inputs.AIKIT_VERSION }}-drop/ -b ${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.MZ_VERSION }}-${{ inputs.AIKIT_VERSION }}-drop/boms/l_modelzoo.txt
+
