@@ -33,7 +33,7 @@ else
     rm -rf ${WORKSPACE}/${DROP_NAME}/boms/*
 fi
 
-cd ${WORKSPACE}
+cd ${WORKSPACE}/modelzoo/.github/utils/aikit
 python create_bom_file.py --drop_delivery_dir ${WORKSPACE}/${DROP_NAME}
 
 echo ""
