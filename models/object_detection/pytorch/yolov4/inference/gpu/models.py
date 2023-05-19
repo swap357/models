@@ -20,7 +20,8 @@ torch._C._jit_set_profiling_executor(False)
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('-n', '--n_classes', required=True, type=int, help='n_classes')
 parser.add_argument('--weight', help='destination of weightfiles')
-parser.add_argument('-i', '--image', help='The address where the picture is stored')
+parser.add_argument('-i', '--image', required=True, help='The address where the picture is stored')
+parser.add_argument('-l', '--labels', required=True, help='COCO labels file')
 parser.add_argument('-e', '--height', required=True, type=int, help='Image height')
 parser.add_argument('-w', '--width', required=True,  type=int, help='Image width')
 parser.add_argument('-name', help='namefile lable_path')
@@ -620,7 +621,7 @@ if __name__ == "__main__":
             if n_classes == 20:
                 namesfile = 'data/voc.names'
             elif n_classes == 80:
-                namesfile = 'data/coco.names'
+                namesfile = args.labels
             else:
                 print("please give namefile")
 
