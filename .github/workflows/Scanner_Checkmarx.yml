@@ -1,4 +1,4 @@
-name: Scanner Checkmarx
+name: Scanner-Checkmarx
 
 on:
   workflow_call:
@@ -69,7 +69,7 @@ on:
         type: string
 jobs:
   checkmarx_job:
-    runs-on: [ self-hosted, Linux ]  # See the GitHub Runners section below to use gasp runners
+    runs-on: [ gasp ]  # See the GitHub Runners section below to use gasp runners
     name: checkmarx
     container:
       image: cache-registry.caas.intel.com/cache/library/python:slim
@@ -107,3 +107,17 @@ jobs:
           checkmarx_zip_file: "${{inputs.repos}}-checkmarx.zip"
           checkmarx_timeout: ${{inputs.checkmarx_timeout}}
           checkmarx_ignore_vulnerabilities: "${{inputs.checkmarx_ignore_vulnerabilities}}"
+      - name: Filter High Risk Vulnerabilities
+        run: |
+          cat checkmarx_results.csv | grep "Query" > checkmarx_results_HV.csv
+          cat checkmarx_results.csv | grep "High" >> checkmarx_results_HV.csv
+          ERROR_FLAG=$(cat checkmarx_results_HV.csv | sed -n '2 p')
+          if [ "${ERROR_FLAG}" != "" ]; then
+            exit 1
+          fi
+      - name: Upload Checkmarx CSV with High Vulnerabilities
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: checkmarx_results_HV.csv
+          path: checkmarx_results_HV.csv

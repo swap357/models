@@ -93,6 +93,7 @@ jobs:
       run: echo "BASENAME=$(basename ${{ env.REQ_PATH }})" >> "$GITHUB_ENV"
     - name: Run ${{ env.REQ_PATH }} SNYK Scan
       run: |
+        echo "Running ${{ env.BASENAME }} SNYK scan"
         export no_proxy+=',snyk.devtools.intel.com'
         docker run -e SNYK_TOKEN=${{ env.SNYK_API_TOKEN }} -e SNYK_CFG_ORG=${{ inputs.snyk_org }} -e SNYK_API=https://snyk.devtools.intel.com/api \
           -e http_proxy=${http_proxy} -e https_proxy=${https_proxy} -e no_proxy=${no_proxy} -e HTTP_PROXY=${HTTP_PROXY} \

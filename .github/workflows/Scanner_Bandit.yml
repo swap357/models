@@ -1,0 +1,76 @@
+name: Scanner-Bandit
+# This is a re-usable workflow for running BANDIT scans.
+# Please follow process/flow on workflow usages/examples in docs/README_BANDIT.md.
+# Docs url: https://github.com/intel-innersource/frameworks.ai.infrastructure.code-scan-tools/blob/one-ci-cd/docs/README_BANDIT.md
+on:
+  workflow_call:
+    inputs:
+      repos:
+        description: 'Enter Project repo for which you want to run Bandit scan:'
+        required: true
+        type: string
+      refs:
+        description: 'Enter Project branch, tag:'
+        required: true
+        type: string
+      excludes:
+        description: 'Enter folders to be excluded eg. -x tools,xyz etc:'
+        required: false
+        type: string
+    secrets:
+      token:
+        description: 'GITHUB_TOKEN or a repo scoped PAT.'
+        required: true
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'Enter Project repo for which you want to run Bandit scan:'
+        required: true
+        type: string
+      refs:
+        description: 'Enter Project branch, tag:'
+        required: true
+        type: string
+      excludes:
+        description: 'Enter folders to be excluded eg. -x tools,xyz etc:'
+        required: false
+        type: string
+
+jobs:
+  scan_bandit:
+    runs-on: [self-hosted, gasp]
+    steps:
+    - name: Set secrets - Workflow Call
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
+    - name: Set secrets - Workflow Dispatch
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.8.0"
+    - name: Checkout Project Repo
+      uses: actions/checkout@v3
+      with:
+        repository: intel-innersource/${{inputs.repos}}
+        token: ${{ env.token }}
+        path: ${{inputs.repos}}
+        ref: ${{inputs.refs}}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit    
+    - name: Run Bandit Scan
+      run: |
+        bandit -r ${{inputs.repos}} ${{inputs.excludes}} -c .bandit.yml -f txt -o ${{github.workspace}}/bandit-scan-log.txt || echo 0        
+    - name: Bandit Scan result summary
+      run: |
+        grep "Code scanned" -A20 ${{github.workspace}}/bandit-scan-log.txt
+    - name: Upload Scan artifact to Github
+      uses: actions/upload-artifact@v3
+      with:
+        name: Bandit-log
+        path: ${{github.workspace}}/bandit-scan-log.txt
