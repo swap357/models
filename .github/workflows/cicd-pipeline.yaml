@@ -6,13 +6,13 @@ on:
     - cron:  '59 23 * * FRI'
 jobs:
   scans:
-    uses: intel-sandbox/frameworks.ai.models.intel-models/.github/workflows/Scans.yaml@develop
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yaml@develop
     secrets: inherit
   #TODO: Enable below three lines when workloads test workflow is merged to develop branch
   #test-workloads:
     #uses: intel-sandbox/frameworks.ai.models.intel-models/.github/workflows/test-workloads.yaml@develop
     #secrets: inherit
   mz-drop:
-    #needs: [run-scans] #TODO: add test-workloads job to the array when is merged to deveop branch
-    uses: intel-sandbox/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yaml@develop
+    needs: [scans] #TODO: add test-workloads job to the array when is merged to deveop branch
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yaml@develop
     secrets: inherit
