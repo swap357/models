@@ -2,6 +2,8 @@ name: Scans
 on:
   pull_request:
     branches: [develop]
+  workflow_call:
+
 jobs:
   scan-snyk:
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Snyk.yml@develop

@@ -1,0 +1,14 @@
+name: CI/CD Pipeline
+on: [workflow_dispatch, repository_dispatch]
+jobs:
+  scans:
+    uses: intel-sandbox/frameworks.ai.models.intel-models-cicd-poc/.github/workflows/Scans.yaml@develop
+    secrets: inherit
+  #TODO: Enable below three lines when workloads test workflow is merged to develop branch
+  #test-workloads:
+    #uses: intel-sandbox/frameworks.ai.models.intel-models-cicd-poc/.github/workflows/test-workloads.yaml@develop
+    #secrets: inherit
+  mz-drop:
+    #needs: [run-scans] #TODO: add test-workloads job to the array when is merged to deveop branch
+    uses: intel-sandbox/frameworks.ai.models.intel-models-cicd-poc/.github/workflows/mz-aikit-drop.yaml@develop
+    secrets: inherit
