@@ -22,22 +22,18 @@ on:
     inputs:
       target_branch:
         description: 'Model zoo branch name'
-        default: develop
         required: true
         type: string
       mz_version:
         description: 'Model zoo version'
-        default: '2.11.0'
         required: true
         type: string
       aikit_release:
         description: 'Target AIKit version'
-        default: '2023.2.0'
         required: true
         type: string
       is_lkg_drop:
         description: 'LKG drop indicator flag'
-        default: false
         required: true
         type: boolean
 
