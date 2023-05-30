@@ -1,9 +1,34 @@
 name: CI/CD Pipeline
 on: 
   workflow_dispatch:
-  repository_dispatch:
+    inputs:
+      target_branch:
+        description: 'Model Zoo branch name'
+        default: develop
+        required: true
+        type: string
+      mz_version:
+        description: 'Model Zoo version'
+        default: '2.11.0'
+        required: true
+        type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        default: '2023.2.0'
+        required: true
+        type: string
+      is_lkg_drop:
+        description: 'LKG drop flag'
+        default: true
+        required: true
+        type: boolean
+  
+  #run job daily on week days at 22:00 PDT
   schedule:
-    - cron:  '59 23 * * FRI'
+    - cron:  '00 22 * * MON-FRI'
+  
+  repository_dispatch:
+    
 jobs:
   scans:
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yml@develop
@@ -16,8 +41,8 @@ jobs:
     needs: [scans] #TODO: add test-workloads job to the array when is merged to deveop branch
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop
     with:
-      target_branch: develop
-      mz_version: '2.11.0'
-      aikit_release: '2023.2.0'
-      is_lkg_drop: true
+      target_branch: ${{ inputs.target_branch }}
+      mz_version: ${{ inputs.mz_version }}
+      aikit_release: ${{ inputs.aikit_release }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop }}
     secrets: inherit
