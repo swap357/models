@@ -30,15 +30,55 @@ on:
   repository_dispatch:
     
 jobs:
-  scans:
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yml@develop
-    secrets: inherit
+  scan-snyk:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Snyk.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      ref: ${{ github.head_ref }}
+      scan_type: monitor
+      snyk_org: iags_mlp
+    secrets:
+      SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-bandit:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Bandit.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: ${{ github.head_ref }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-coverity:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Coverity.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: ${{ github.head_ref }}
+      projectType: python
+      url: https://coverityent.devtools.intel.com/prod8
+      stream: model_zoo_first_test
+    secrets:
+      USER: tf_qa_prod
+      PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-checkmarx:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Checkmarx.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: ${{ github.head_ref }}
+      projectid: 352866
+      region: INTEL-AMR
+      checkmarx_timeout: 5400
+      checkmarx_ignore_vulnerabilities: true
+    secrets:
+      SYS_ACCOUNT: tf_qa_prod
+      CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}
   #TODO: Enable below three lines when workloads test workflow is merged to develop branch
   #test-workloads:
     #uses: intel-sandbox/frameworks.ai.models.intel-models/.github/workflows/test-workloads.yml@develop
     #secrets: inherit
   mz-drop:
-    needs: [scans] #TODO: add test-workloads job to the array when is merged to deveop branch
+    needs: [scan-snyk, scan-bandit, scan-coverity, scan-checkmarx] #TODO: add test-workloads job to the array when is merged to deveop branch
+    if: "always()&&(needs.scan-snyk.outputs.job_status=='success')"
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop
     with:
       target_branch: ${{ inputs.target_branch || 'develop' }}
