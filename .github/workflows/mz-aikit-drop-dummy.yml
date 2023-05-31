@@ -46,6 +46,6 @@ jobs:
           echo "Environment:"
           echo "target_branch: ${{ inputs.target_branch }}"
           echo "mz_version: ${{ inputs.mz_version }}"
-          echo "aikit_release: ${{ inputs.aikit_release }}""
+          echo "aikit_release: ${{ inputs.aikit_release }}"
           echo "is_lkg_drop: ${{ inputs.is_lkg_drop }}"
           echo "Running job for new drop..."
