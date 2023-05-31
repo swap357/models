@@ -19,7 +19,7 @@ on:
         type: string
       is_lkg_drop:
         description: 'LKG drop flag'
-        default: true
+        default: false
         required: true
         type: boolean
   
@@ -44,5 +44,5 @@ jobs:
       target_branch: ${{ inputs.target_branch || 'develop' }}
       mz_version: ${{ inputs.mz_version || '2.11.0' }}
       aikit_release: ${{ inputs.aikit_release || '2023.2.0' }}
-      is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop || true }}
     secrets: inherit
