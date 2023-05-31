@@ -41,8 +41,8 @@ jobs:
     needs: [scans] #TODO: add test-workloads job to the array when is merged to deveop branch
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop
     with:
-      target_branch: ${{ inputs.target_branch }}
-      mz_version: ${{ inputs.mz_version }}
-      aikit_release: ${{ inputs.aikit_release }}
-      is_lkg_drop: ${{ inputs.is_lkg_drop }}
+      target_branch: ${{ inputs.target_branch || 'develop' }}
+      mz_version: ${{ inputs.mz_version || '2.11.0' }}
+      aikit_release: ${{ inputs.aikit_release || '2023.2.0' }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
     secrets: inherit
