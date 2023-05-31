@@ -1,0 +1,51 @@
+name: Model zoo drop for AIKit testing dummy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Model zoo branch name'
+        default: develop
+        required: true
+        type: string
+      mz_version:
+        description: 'Model zoo version'
+        default: '2.11.0'
+        required: true
+        type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        default: '2023.2.0'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      target_branch:
+        description: 'Model zoo branch name'
+        required: true
+        type: string
+      mz_version:
+        description: 'Model zoo version'
+        required: true
+        type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        required: true
+        type: string
+      is_lkg_drop:
+        description: 'LKG drop indicator flag'
+        required: true
+        type: boolean
+
+jobs:
+  aikit_drop_facade:
+    runs-on: Linux
+    steps:
+      - name: Drop new package
+        run: |
+          echo "Environment:"
+          echo "target_branch: ${{ inputs.target_branch }}"
+          echo "mz_version: ${{ inputs.mz_version }}"
+          echo "aikit_release: ${{ inputs.aikit_release }}""
+          echo "is_lkg_drop: ${{ inputs.is_lkg_drop }}"
+          echo "Running job for new drop..."
