@@ -37,13 +37,17 @@ on:
         required: true
         default: fp32
         type: string
-      batch_size:
-        required: true
-        default: 1
-        type: string
       dataset:
         required: false
         type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        required: false
+        type: string
+      is_lkg_drop:
+        required: false
+        default: false
+        type: boolean
 
   workflow_call:
     inputs:
@@ -63,9 +67,13 @@ on:
         required: true
         type: string
       is_lkg_drop:
-        required: true
+        required: false
         default: false
         type: boolean
+      aikit_release:
+        description: 'Target AIKit version'
+        required: true
+        type: string
       precision_1:
         required: true
         type: string
@@ -125,6 +133,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Checkout OneAPI Tools Repository
+      uses: actions/checkout@v3
+      with:
+        repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
+        token: ${{ secrets.SYSTFQABOT_TOKEN }}
+        path: oneapi_drop_tool
     - name: Install dependencies
       run: |
         apt-get update
@@ -156,16 +170,18 @@ jobs:
         PRECISIONS=("${{ inputs.precision_1 }}" "${{ inputs.precision_2 }}" "${{ inputs.precision_3 }}" "${{ inputs.precision_4 }}" "${{ inputs.precision_5 }}")
         for idx in {0..4}; do
           if [ "${PRECISIONS["$idx"]}" != "" ]; then
-            ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE}
-            ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${{ inputs.batch_size }} ${PRECISIONS["$idx"]} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
+            ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
+            ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${PRECISIONS["$idx"]} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
           fi
         done
     - name: Run ${{ inputs.workload }} tests - Workflow Dispatch
       if: github.event_name == 'workflow_dispatch'
+      env:
+        TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
       shell: bash
       run: |
-        ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE}
-        ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${{ inputs.batch_size }} ${{ inputs.precision }} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
+        ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
+        ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${{ inputs.precision }} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
     - if: success() || failure()
       uses: actions/upload-artifact@v3
       with:
