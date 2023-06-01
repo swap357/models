@@ -1,0 +1,44 @@
+name: Model Zoo CI/CD
+on:
+  pull_request:
+    branches: [develop]
+
+jobs:
+  setup:
+    runs-on: [self-hosted, tf_dataset, Linux]
+    outputs:
+      tensorflow-tests: ${{ steps.set-input.outputs.TENSORFLOW_TESTS }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Define matrix - CPU
+      id: set-input
+      run: |
+        # Read input json file objects and define them as a matrix
+        echo "TENSORFLOW_TESTS=$(jq -c '.data' .github/config/MZ-TensorFlow.json)" >> $GITHUB_OUTPUT
+        # echo "ITEX_XPU_TESTS=$(jq -c '.data' .github/config/MZ-ITEX-XPU.json)" >> $GITHUB_OUTPUT
+        # echo "IPEX_XPU_TESTS=$(jq -c '.data' .github/config/MZ-IPEX-XPU.json)" >> $GITHUB_OUTPUT
+        # echo "PYTORCH_TESTS=$(jq -c '.data' .github/config/MZ-PyTorch.json)" >> $GITHUB_OUTPUT
+
+  test-TENSORFLOW:
+    secrets: inherit
+    needs: setup
+    strategy:
+      matrix:
+        tests_arr: ${{ fromJson(needs.setup.outputs.tensorflow-tests) }}
+      fail-fast: false
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/model-zoo-cicd-test.yml@develop
+    with:
+      runner_label: tf_dataset
+      workload: ${{ matrix.tests_arr.workload }}
+      framework: ${{ matrix.tests_arr.framework }}
+      framework_version: ${{ matrix.tests_arr.framework_version }}
+      script: ${{ matrix.tests_arr.test.script }}
+      is_lkg_drop: true
+      precision_1: ${{ matrix.tests_arr.test.precision[0] }}
+      precision_2: ${{ matrix.tests_arr.test.precision[1] }}
+      precision_3: ${{ matrix.tests_arr.test.precision[2] }}
+      precision_4: ${{ matrix.tests_arr.test.precision[3] }}
+      precision_5: ${{ matrix.tests_arr.test.precision[4] }}
+      batch_size: ${{ matrix.tests_arr.test.batch_size }}
+      dataset: ${{ matrix.tests_arr.test.dataset }}
