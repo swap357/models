@@ -181,7 +181,7 @@ jobs:
       shell: bash
       run: |
         ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
-        ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${{ inputs.precision }} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
+        ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${{ inputs.precision_1 }} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
     - if: success() || failure()
       uses: actions/upload-artifact@v3
       with:
