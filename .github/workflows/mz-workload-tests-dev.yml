@@ -1,4 +1,4 @@
-name: Model Zoo CI/CD Tests
+name: Model Zoo Workload Tests Dev
 on:
   workflow_dispatch:
     inputs:
