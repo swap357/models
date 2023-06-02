@@ -29,7 +29,7 @@ jobs:
       matrix:
         tests_arr: ${{ fromJson(needs.setup.outputs.tensorflow-tests) }}
       fail-fast: false
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/model-zoo-cicd-test.yml@develop
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-tests.yml@develop
     with:
       runner_label: tf_dataset
       workload: ${{ matrix.tests_arr.workload }}
