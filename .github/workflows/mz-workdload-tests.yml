@@ -1,7 +1,9 @@
-name: Model Zoo CI/CD
+name: Model Zoo Workload Tests 
 on:
   pull_request:
     branches: [develop]
+  
+  workflow_call:
 
 jobs:
   setup:
