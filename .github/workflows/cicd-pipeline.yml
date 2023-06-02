@@ -72,13 +72,12 @@ jobs:
       SYS_ACCOUNT: tf_qa_prod
       CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}
       token: ${{ secrets.GITHUB_TOKEN }}
-  #TODO: Enable below three lines when workloads test workflow is merged to develop branch
   workload-tests:
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-tests.yml@develop
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-tests.yml
     secrets: inherit
   mz-drop:
     if: ${{ always() && needs.scan-snyk.result=='success'  && needs.workload-tests.result=='success' }}
-    needs: [scan-snyk, scan-bandit, scan-coverity, scan-checkmarx, workload-tests] #TODO: add test-workloads job to the array when is merged to deveop branch
+    needs: [scan-snyk, scan-bandit, scan-coverity, scan-checkmarx, workload-tests]
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop-dummy.yml@develop
     with:
       target_branch: ${{ inputs.target_branch || 'develop' }}
