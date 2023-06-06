@@ -164,7 +164,7 @@ jobs:
           fi
         fi
     - name: Test Setup - PR/Schedule
-      if: github.event_name != 'workflow_dispatch'
+      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') 
       env:
         TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
       shell: bash
@@ -178,7 +178,7 @@ jobs:
           fi
         done
     - name: Run ${{ inputs.workload }} tests - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'mz-workload-tests.yml') 
       env:
         TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
       shell: bash
