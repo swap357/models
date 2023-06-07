@@ -163,8 +163,8 @@ jobs:
             echo "FOLDER=PyTorch" >> "$GITHUB_ENV"
           fi
         fi
-    - name: Test Setup - PR/Schedule
-      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') 
+    - name: Run ${{ inputs.workload }} tests - Workflow Call
+      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml')
       env:
         TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
       shell: bash
@@ -178,7 +178,7 @@ jobs:
           fi
         done
     - name: Run ${{ inputs.workload }} tests - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'mz-workload-tests.yml') 
+      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'mz-workload-tests.yml')
       env:
         TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
       shell: bash
@@ -188,5 +188,5 @@ jobs:
     - if: success() || failure()
       uses: actions/upload-artifact@v3
       with:
-        name: result-artifact
-        path: tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/output/*
+        name: workload-results
+        path: tests/cicd/${{ env.FOLDER }}/output/*

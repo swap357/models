@@ -41,11 +41,11 @@ jobs:
     runs-on: [self-hosted, gasp]
     steps:
     - name: Set secrets - Workflow Call
-      if: github.event_name == 'pull_request'
+      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') || contains(github.event.workflow, 'Scans.yml')
       run: |
         echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
     - name: Set secrets - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'Scanner_Bandit.yml')
       run: |
         echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
     - uses: actions/checkout@v3

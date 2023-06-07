@@ -24,7 +24,7 @@ on:
         default: gcc
       url:
         description: 'Enter coverity server url:'
-        required: true 
+        required: true
         type: string
       stream:
         description: 'Enter coverity stream name:'
@@ -73,13 +73,13 @@ jobs:
     runs-on: [ k8-runners ]
     steps:
     - name: Set secrets - Workflow Call
-      if: github.event_name == 'pull_request'
+      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') || contains(github.event.workflow, 'Scans.yml')
       run: |
         echo "USER=${{ secrets.USER }}" >> "$GITHUB_ENV"
         echo "PASSWORD=${{ secrets.PASSWORD }}" >> "$GITHUB_ENV"
         echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
     - name: Set secrets - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'Scanner_Coverity.yml')
       run: |
         echo "USER=tf_qa_prod" >> "$GITHUB_ENV"
         echo "PASSWORD=${{ secrets.TF_QA_PROD }}" >> "$GITHUB_ENV"
@@ -96,10 +96,10 @@ jobs:
         ref: ${{inputs.refs}}
     - name: Download and Install coverity
       run: |
-        wget https://ubit-artifactory-or.intel.com/artifactory/coverity-or-local/Enterprise/cov-analysis-linux64-2022.3.1.sh
+        wget https://ubit-artifactory-or.intel.com/artifactory/coverity-or-local/Enterprise/cov-analysis-linux64-2023.3.0.sh
         wget https://ubit-artifactory-or.intel.com/artifactory/coverity-or-local/Enterprise/license.dat
-        chmod +x ${GITHUB_WORKSPACE}/cov-analysis-linux64-2022.3.1.sh
-        ./cov-analysis-linux64-2022.3.1.sh -q --installation.dir=${GITHUB_WORKSPACE}/coverity/analysis/ \
+        chmod +x ${GITHUB_WORKSPACE}/cov-analysis-linux64-2023.3.0.sh
+        ./cov-analysis-linux64-2023.3.0.sh -q --installation.dir=${GITHUB_WORKSPACE}/coverity/analysis/ \
         --license.agreement=agree --license.region=0 --license.type.choice=0 \
         --license.cov.path=${GITHUB_WORKSPACE}/license.dat --component.sdk=false --component.skip.documentation=true
         echo "${GITHUB_WORKSPACE}/coverity/analysis/bin/" >> $GITHUB_PATH

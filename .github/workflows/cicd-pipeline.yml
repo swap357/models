@@ -47,40 +47,38 @@ jobs:
       refs: ${{ github.head_ref }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
-  #TODO: Uncomment below lines after merging Gerry's fix to develop
-  #scan-coverity:
-  #  uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Coverity.yml@develop
-  #  with:
-  #    repos: frameworks.ai.models.intel-models
-  #    refs: ${{ github.head_ref }}
-  #    projectType: python
-  #    url: https://coverityent.devtools.intel.com/prod8
-  #    stream: model_zoo_first_test
-  #  secrets:
-  #    USER: tf_qa_prod
-  #    PASSWORD: ${{ secrets.TF_QA_PROD }}
-  #    token: ${{ secrets.GITHUB_TOKEN }}
-  #TODO: Uncomment below lines after merging Gerry's fix to develop
-  #scan-checkmarx:
-  #  uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Checkmarx.yml@develop
-  #  with:
-  #    repos: frameworks.ai.models.intel-models
-  #    refs: ${{ github.head_ref }}
-  #    projectid: 352866
-  #    region: INTEL-AMR
-  #    checkmarx_timeout: 5400
-  #    checkmarx_ignore_vulnerabilities: true
-  #  secrets:
-  #    SYS_ACCOUNT: tf_qa_prod
-  #    CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}
-  #    token: ${{ secrets.GITHUB_TOKEN }}
+  scan-coverity:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Coverity.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: ${{ github.head_ref }}
+      projectType: python
+      url: https://coverityent.devtools.intel.com/prod8
+      stream: model_zoo_first_test
+    secrets:
+      USER: tf_qa_prod
+      PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+  scan-checkmarx:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Checkmarx.yml@develop
+    with:
+      repos: frameworks.ai.models.intel-models
+      refs: ${{ github.head_ref }}
+      projectid: 352866
+      region: INTEL-AMR
+      checkmarx_timeout: 5400
+      checkmarx_ignore_vulnerabilities: true
+    secrets:
+      SYS_ACCOUNT: tf_qa_prod
+      CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}
   workload-tests:
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-launcher.yml@develop
     secrets: inherit
   mz-drop:
     #if: ${{ always() && needs.scan-snyk.result=='success'  && needs.workload-tests.result=='success' }}
-    needs: [scan-snyk, scan-bandit, workload-tests]
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop-dummy.yml@develop
+    needs: [scan-snyk, scan-bandit, scan-coverity, scan-checkmarx, workload-tests]
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop   
     with:
       target_branch: ${{ inputs.target_branch || 'develop' }}
       mz_version: ${{ inputs.mz_version || '2.11.0' }}

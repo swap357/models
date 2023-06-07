@@ -75,13 +75,13 @@ jobs:
       image: cache-registry.caas.intel.com/cache/library/python:slim
     steps:
       - name: Set secrets - Workflow Call
-        if: github.event_name == 'pull_request'
+        if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') || contains(github.event.workflow, 'Scans.yml')
         run: |
           echo "CHECKMARX_PASSWORD=${{ secrets.CHECKMARX_PASSWORD }}" >> "$GITHUB_ENV"
           echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
           echo "SYS_ACCOUNT=${{ secrets.SYS_ACCOUNT }}" >> "$GITHUB_ENV"
       - name: Set secrets - Workflow Dispatch
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'Scanner_Checkmarx.yml')
         run: |
           echo "CHECKMARX_PASSWORD=${{ secrets.TF_QA_PROD }}" >> "$GITHUB_ENV"
           echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
