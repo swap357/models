@@ -77,7 +77,7 @@ jobs:
     secrets: inherit
   mz-drop:
     #if: ${{ always() && needs.scan-snyk.result=='success'  && needs.workload-tests.result=='success' }}
-    needs: [scan-snyk, scan-bandit, scan-coverity, scan-checkmarx, workload-tests]
+    needs: [scan-snyk, scan-bandit, scan-coverity, workload-tests]
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop   
     with:
       target_branch: ${{ inputs.target_branch || 'develop' }}
