@@ -1,54 +1,17 @@
 name: Scanner-Checkmarx
-
 on:
-  workflow_call:
-    inputs:
-      repos:
-        description: 'Enter Project repo for which you want to run checkmarx scan:'
-        required: true
-        type: string
-      refs:
-        description: 'Enter Project branch, tag:'
-        required: true
-        type: string
-      projectid:
-        description: 'Enter project-id:'
-        required: true
-        type: string
-      region:
-        description: 'Enter User-account region : eg- INTEL-GAR, INTEL-GER, INTEL-AMR'
-        required: true
-        type: string
-      checkmarx_ignore_vulnerabilities:
-        description: Exit normally even if vulnerabilities are found by Checkmarx 
-        required: false
-        default: false
-        type: boolean
-      checkmarx_timeout:
-        description: Abort if the timeout (in seconds) is exceeded
-        required: false
-        default: '600'
-        type: string
-    secrets:
-      CHECKMARX_PASSWORD:
-        description: 'Enter CHECKMARX_PASSWORD:'
-        required: true
-      SYS_ACCOUNT:
-        description: 'Enter SYS_ACCOUNT:'
-        required: true        
-      token:
-        description: 'GITHUB_TOKEN or a repo scoped PAT.'
-        required: true
   workflow_dispatch:
     inputs:
       repos:
         description: 'Enter Project repo for which you want to run checkmarx scan:'
         required: true
         type: string
+        default: frameworks.ai.models.intel-models
       refs:
         description: 'Enter Project branch, tag:'
         required: true
         type: string
+        default: develop
       projectid:
         description: 'Enter project-id:'
         required: true
@@ -57,67 +20,35 @@ on:
         description: 'Enter User-account region : eg- INTEL-GAR, INTEL-GER, INTEL-AMR'
         required: true
         type: string
-      checkmarx_ignore_vulnerabilities:
+        default: INTEL-AMR
+      ignore_vulnerabilities:
         description: Exit normally even if vulnerabilities are found by Checkmarx 
         required: false
-        default: false
+        default: true
         type: boolean
-      checkmarx_timeout:
+      timeout:
         description: Abort if the timeout (in seconds) is exceeded
         required: false
         default: '600'
         type: string
+      runner_label:
+        description: 'Enter one label of the runner that will execute the workflow:'
+        required: true
+        type: string
+        default: gasp
+
 jobs:
-  checkmarx_job:
-    runs-on: [ gasp ]  # See the GitHub Runners section below to use gasp runners
-    name: checkmarx
-    container:
-      image: cache-registry.caas.intel.com/cache/library/python:slim
-    steps:
-      - name: Set secrets - Workflow Call
-        if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') || contains(github.event.workflow, 'Scans.yml')
-        run: |
-          echo "CHECKMARX_PASSWORD=${{ secrets.CHECKMARX_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
-          echo "SYS_ACCOUNT=${{ secrets.SYS_ACCOUNT }}" >> "$GITHUB_ENV"
-      - name: Set secrets - Workflow Dispatch
-        if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'Scanner_Checkmarx.yml')
-        run: |
-          echo "CHECKMARX_PASSWORD=${{ secrets.TF_QA_PROD }}" >> "$GITHUB_ENV"
-          echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
-          echo "SYS_ACCOUNT=tf_qa_prod" >> "$GITHUB_ENV"
-      - name: Checkout Project Repo
-        uses: actions/checkout@v3
-        with:
-          repository: intel-innersource/${{inputs.repos}}
-          token: ${{ env.token }}
-          path: code
-          ref: ${{inputs.refs}}
-      - name: Pack Additional Resources
-        run: |
-          apt-get update
-          apt-get install curl jq zip unzip -y
-          zip -r ${{inputs.repos}}-checkmarx.zip ${GITHUB_WORKSPACE}/code/.*
-      - name: Run Checkmarx Scan
-        uses: intel-innersource/frameworks.actions.checkmarx@v1.5
-        with:
-          checkmarx_username: '${{inputs.region}}/${{ env.SYS_ACCOUNT }}'
-          checkmarx_password: "${{ env.CHECKMARX_PASSWORD }}"
-          checkmarx_project_id: ${{inputs.projectid}}
-          checkmarx_zip_file: "${{inputs.repos}}-checkmarx.zip"
-          checkmarx_timeout: ${{inputs.checkmarx_timeout}}
-          checkmarx_ignore_vulnerabilities: "${{inputs.checkmarx_ignore_vulnerabilities}}"
-      - name: Filter High Risk Vulnerabilities
-        run: |
-          cat checkmarx_results.csv | grep "Query" > checkmarx_results_HV.csv
-          cat checkmarx_results.csv | grep "High" >> checkmarx_results_HV.csv
-          ERROR_FLAG=$(cat checkmarx_results_HV.csv | sed -n '2 p')
-          if [ "${ERROR_FLAG}" != "" ]; then
-            exit 1
-          fi
-      - name: Upload Checkmarx CSV with High Vulnerabilities
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: checkmarx_results_HV.csv
-          path: checkmarx_results_HV.csv
+  scan-checkmarx:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Checkmarx.yml@one-ci-cd
+    with:
+      repos: ${{ inputs.repos }}
+      refs: ${{ inputs.refs }}
+      projectid: ${{ inputs.projectid }}
+      region: ${{ inputs.region }}
+      timeout: ${{ inputs.checkmarx_timeout }}
+      ignore_vulnerabilities: ${{ inputs.checkmarx_ignore_vulnerabilities }}
+      runner_label: ${{ inputs.runner_label }}
+    secrets:
+      SYS_ACCOUNT: tf_qa_prod
+      CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}

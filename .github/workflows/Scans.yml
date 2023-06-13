@@ -6,43 +6,48 @@ on:
 
 jobs:
   scan-snyk:
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Snyk.yml@develop
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk.yml@one-ci-cd
     with:
       repos: frameworks.ai.models.intel-models
       ref: ${{ github.head_ref }}
       scan_type: monitor
       snyk_org: iags_mlp
+      runner_label: k8-runners
     secrets:
       SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
   scan-bandit:
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Bandit.yml@develop
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Bandit.yml@one-ci-cd
     with:
       repos: frameworks.ai.models.intel-models
       refs: ${{ github.head_ref }}
+      config_file: .bandit.yml
+      runner_label: k8-runners
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
   scan-coverity:
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Coverity.yml@develop
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Coverity.yml@one-ci-cd
     with:
       repos: frameworks.ai.models.intel-models
       refs: ${{ github.head_ref }}
       projectType: python
       url: https://coverityent.devtools.intel.com/prod8
       stream: model_zoo_first_test
+      runner_label: k8-runners
     secrets:
       USER: tf_qa_prod
       PASSWORD: ${{ secrets.TF_QA_PROD }}
       token: ${{ secrets.GITHUB_TOKEN }}
   scan-checkmarx:
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scanner_Checkmarx.yml@develop
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Checkmarx.yml@one-ci-cd
     with:
       repos: frameworks.ai.models.intel-models
       refs: ${{ github.head_ref }}
       projectid: 352866
       region: INTEL-AMR
-      checkmarx_timeout: 5400
-      checkmarx_ignore_vulnerabilities: true
+      timeout: 5400
+      ignore_vulnerabilities: true
+      runner_label: gasp
     secrets:
       SYS_ACCOUNT: tf_qa_prod
       CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}

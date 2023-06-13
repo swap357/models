@@ -1,76 +1,39 @@
 name: Scanner-Bandit
-# This is a re-usable workflow for running BANDIT scans.
-# Please follow process/flow on workflow usages/examples in docs/README_BANDIT.md.
-# Docs url: https://github.com/intel-innersource/frameworks.ai.infrastructure.code-scan-tools/blob/one-ci-cd/docs/README_BANDIT.md
 on:
-  workflow_call:
-    inputs:
-      repos:
-        description: 'Enter Project repo for which you want to run Bandit scan:'
-        required: true
-        type: string
-      refs:
-        description: 'Enter Project branch, tag:'
-        required: true
-        type: string
-      excludes:
-        description: 'Enter folders to be excluded eg. -x tools,xyz etc:'
-        required: false
-        type: string
-    secrets:
-      token:
-        description: 'GITHUB_TOKEN or a repo scoped PAT.'
-        required: true
   workflow_dispatch:
     inputs:
       repos:
         description: 'Enter Project repo for which you want to run Bandit scan:'
         required: true
         type: string
+        default: frameworks.ai.models.intel-models
       refs:
         description: 'Enter Project branch, tag:'
         required: true
         type: string
+        default: develop
       excludes:
-        description: 'Enter folders to be excluded eg. -x tools,xyz etc:'
+        description: 'Enter target repository folders to be excluded eg. tools,xyz etc:'
         required: false
         type: string
+      config_file:
+        description: 'Enter target repository configuration file for Bandit scan eg. .bandit.yml:'
+        required: false
+        type: string
+        default: .bandit.yml
+      runner_label:
+        description: 'Enter one label of the runner that will execute the workflow:'
+        required: true
+        type: string
+        default: k8-runners
 
 jobs:
-  scan_bandit:
-    runs-on: [self-hosted, gasp]
-    steps:
-    - name: Set secrets - Workflow Call
-      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') || contains(github.event.workflow, 'Scans.yml')
-      run: |
-        echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
-    - name: Set secrets - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'Scanner_Bandit.yml')
-      run: |
-        echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: "3.8.0"
-    - name: Checkout Project Repo
-      uses: actions/checkout@v3
-      with:
-        repository: intel-innersource/${{inputs.repos}}
-        token: ${{ env.token }}
-        path: ${{inputs.repos}}
-        ref: ${{inputs.refs}}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install bandit    
-    - name: Run Bandit Scan
-      run: |
-        bandit -r ${{inputs.repos}} ${{inputs.excludes}} -c .bandit.yml -f txt -o ${{github.workspace}}/bandit-scan-log.txt || echo 0        
-    - name: Bandit Scan result summary
-      run: |
-        grep "Code scanned" -A20 ${{github.workspace}}/bandit-scan-log.txt
-    - name: Upload Scan artifact to Github
-      uses: actions/upload-artifact@v3
-      with:
-        name: Bandit-log
-        path: ${{github.workspace}}/bandit-scan-log.txt
+  scan-bandit:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Bandit.yml@one-ci-cd
+    with:
+      repos: ${{ inputs.repos }}
+      refs: ${{ inputs.refs }}
+      config_file: ${{ inputs.config_file }}
+      runner_label: ${{ inputs.runner_label }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}

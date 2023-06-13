@@ -1,116 +1,42 @@
 name: Scanner-Snyk
 on:
-  workflow_call:
-    inputs:
-      repos:
-        description: 'Enter the intel-innersource Project repo name:'
-        type: string
-        required: true
-      ref:
-        description: 'Enter Project branch, tag:'
-        required: true
-        type: string
-      scan_type:
-        description: 'Scan type for Snyk'
-        required: false
-        type: string
-        default: 'monitor'
-      snyk_org:
-        description: 'Enter synk org: (eg- iags_mlp)'
-        required: true
-        type: string
-    secrets:
-      SNYK_API_TOKEN:
-        description: 'Enter Snyk Api Token:'
-        required: true
-      token:
-        description: 'GITHUB_TOKEN or a repo scoped PAT.'
-        required: true
   workflow_dispatch:
     inputs:
       repos:
         description: 'Enter the intel-innersource Project repo name:'
         type: string
         required: true
+        default: frameworks.ai.models.intel-models
       ref:
         description: 'Enter Project branch, tag:'
         required: true
         type: string
+        default: develop
       scan_type:
         description: 'Scan type for Snyk'
         required: false
         type: string
-        default: 'monitor'
+        default: monitor
       snyk_org:
         description: 'Enter synk org: (eg- iags_mlp)'
         required: true
         type: string
+        default: iags_mlp
+      runner_label:
+        description: 'Enter one label of the runner that will execute the workflow (gasp will not work):'
+        required: true
+        type: string
+        default: k8-runners
+
 jobs:
-  get-requiremets:
-    runs-on: [ k8-runners ]
-    outputs:
-      REQUIREMENTS: ${{ steps.set-requirements.outputs.REQUIREMENTS }}
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        repository: intel-innersource/${{ inputs.repos }}
-        ref: ${{ inputs.ref }}
-        submodules: true
-    - name: Define matrix
-      id: set-requirements
-      run: |
-        REQS=( $(find $(pwd) -name "requirement*.txt") )
-        echo "REQUIREMENTS=$(printf '%s\n' "${REQS[@]}" | jq -R . | jq -s . | jq -c .)" >> "$GITHUB_OUTPUT"
-  scan_snyk:
-    needs: [get-requiremets]
-    runs-on: [ k8-runners ]
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        REQS: ${{ fromJson(needs.get-requiremets.outputs.REQUIREMENTS) }}
-    steps:
-    - name: Set secrets - Workflow Call
-      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml') || contains(github.event.workflow, 'Scans.yml')
-      run: |
-        echo "SNYK_API_TOKEN=${{ secrets.SNYK_API_TOKEN }}" >> "$GITHUB_ENV"
-        echo "token=${{ secrets.token }}" >> "$GITHUB_ENV"
-    - name: Set secrets - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'Scanner_Snyk.yml')
-      run: |
-        echo "SNYK_API_TOKEN=${{ secrets.SNYK_API_TOKEN }}" >> "$GITHUB_ENV"
-        echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        repository: intel-innersource/${{ inputs.repos }}
-        ref: ${{ inputs.ref }}
-        submodules: true
-    - name: Set REQ_PATH ENV variable
-      run: echo "REQ_PATH=$(dirname "${{ matrix.REQS }}")" >> "$GITHUB_ENV"
-    - name: Set BASENAME ENV variable
-      run: echo "BASENAME=$(basename ${{ env.REQ_PATH }})" >> "$GITHUB_ENV"
-    - name: Run ${{ env.REQ_PATH }} SNYK Scan
-      run: |
-        echo "Running ${{ env.BASENAME }} SNYK scan"
-        export no_proxy+=',snyk.devtools.intel.com'
-        docker run -e SNYK_TOKEN=${{ env.SNYK_API_TOKEN }} -e SNYK_CFG_ORG=${{ inputs.snyk_org }} -e SNYK_API=https://snyk.devtools.intel.com/api \
-          -e http_proxy=${http_proxy} -e https_proxy=${https_proxy} -e no_proxy=${no_proxy} -e HTTP_PROXY=${HTTP_PROXY} \
-            -e HTTPS_PROXY=${HTTPS_PROXY} -e NO_PROXY=${NO_PROXY} -v ${{ env.REQ_PATH }}:/project --rm \
-              amr-registry.caas.intel.com/aiops/snyk-cli:1.690.0.python-3.9 ${{  inputs.scan_type }} --severity-threshold=high \
-                --project-name='${{ env.REQ_PATH }}'
-    - name: Save output file
-      if: success() || failure()
-      run: |
-        mkdir snyk-output
-        mv ${{ env.REQ_PATH }}/snyk-result.json ./snyk-output/snyk-result-${{ env.BASENAME }}.json
-    - name: Upload SNYK Artifacts
-      if: success() || failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: snyk-log
-        path: snyk-output/snyk-result-${{ env.BASENAME }}.json
-    - name: Cleanup
-      if: success() || failure()
-      run: rm -rf snyk-output
+  scan-snyk:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk.yml@one-ci-cd
+    with:
+      repos: ${{ inputs.repos }}
+      ref: ${{ inputs.ref }}
+      scan_type: ${{ inputs.scan_type }}
+      snyk_org: ${{ inputs.snyk_org }}
+      runner_label: ${{ inputs.runner_label }}
+    secrets:
+      SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
