@@ -31,7 +31,7 @@ on:
         type: string
       script:
         required: true
-        default: inference_realtime_multi_instance.sh
+        default: inference_throughput_multi_instance.sh
         type: string
       precision:
         required: true
