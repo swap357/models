@@ -58,4 +58,3 @@ python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/mode
   -b ${BATCH_SIZE} \
   --benchmark 1 \
   --iter ${NUM_ITERATIONS} 2>&1 | tee $OUTPUT_DIR/YOLOv4_int8_bs256_inf_block_nchw.log
-  
