@@ -45,8 +45,8 @@ jobs:
       refs: ${{ inputs.refs }}
       projectid: ${{ inputs.projectid }}
       region: ${{ inputs.region }}
-      timeout: ${{ inputs.checkmarx_timeout }}
-      ignore_vulnerabilities: ${{ inputs.checkmarx_ignore_vulnerabilities }}
+      timeout: ${{ inputs.timeout }}
+      ignore_vulnerabilities: ${{ inputs.ignore_vulnerabilities }}
       runner_label: ${{ inputs.runner_label }}
     secrets:
       SYS_ACCOUNT: tf_qa_prod
