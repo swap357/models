@@ -30,7 +30,7 @@ on:
 
 jobs:
   scan-snyk:
-    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk.yml@one-ci-cd
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk_Project_Repo.yml@one-ci-cd
     with:
       repos: ${{ inputs.repos }}
       ref: ${{ inputs.ref }}
