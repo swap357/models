@@ -7,7 +7,7 @@ on:
         type: string
         required: true
         default: frameworks.ai.models.intel-models
-      ref:
+      refs:
         description: 'Enter Project branch, tag:'
         required: true
         type: string
@@ -33,7 +33,7 @@ jobs:
     uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk_Project_Repo.yml@one-ci-cd
     with:
       repos: ${{ inputs.repos }}
-      ref: ${{ inputs.ref }}
+      refs: ${{ inputs.refs }}
       scan_type: ${{ inputs.scan_type }}
       snyk_org: ${{ inputs.snyk_org }}
       runner_label: ${{ inputs.runner_label }}
