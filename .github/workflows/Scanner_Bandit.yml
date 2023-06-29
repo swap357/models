@@ -1,0 +1,39 @@
+name: Scanner-Bandit
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'Enter Project repo for which you want to run Bandit scan:'
+        required: true
+        type: string
+        default: frameworks.ai.models.intel-models
+      refs:
+        description: 'Enter Project branch, tag:'
+        required: true
+        type: string
+        default: develop
+      excludes:
+        description: 'Enter target repository folders to be excluded eg. tools,xyz etc:'
+        required: false
+        type: string
+      config_file:
+        description: 'Enter target repository configuration file for Bandit scan eg. .bandit.yml:'
+        required: false
+        type: string
+        default: .bandit.yml
+      runner_label:
+        description: 'Enter one label of the runner that will execute the workflow:'
+        required: true
+        type: string
+        default: k8-runners
+
+jobs:
+  scan-bandit:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Bandit.yml@one-ci-cd
+    with:
+      repos: ${{ inputs.repos }}
+      refs: ${{ inputs.refs }}
+      config_file: ${{ inputs.config_file }}
+      runner_label: ${{ inputs.runner_label }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
