@@ -103,18 +103,7 @@ export PRETRAINED_MODEL=<path to directory where the pretrained weights file was
 export OUTPUT_DIR=<Path to save the output logs>
 
 Run the inference script, only int8 precision is supported:
-./quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_with_dummy_data.sh
-```
-To execute `flex_multi_card_batch_inference.sh` and `flex_multi_card_online_inference.sh` on Flex series 140, install the following components 
-
-```bash
-apt-get update && \
-apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl 
-```
-Then execute the quickstart scripts.
-```bash
-./quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_batch_inference.sh 
-./quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_online_inference.sh
+./quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_block_format.sh
 ```
 To execute `flex_multi_card_batch_inference.sh` and `flex_multi_card_online_inference.sh` on Flex series 140, install the following components 
 
