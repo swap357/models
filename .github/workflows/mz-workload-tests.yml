@@ -143,6 +143,7 @@ jobs:
       run: |
         apt-get update
         apt-get install bc
+        apt-get -y install git
         apt-get -y install numactl
     - name: Define framework folder
       shell: bash
