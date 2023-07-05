@@ -6,10 +6,10 @@ on:
 
 jobs:
   scan-snyk:
-    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk.yml@one-ci-cd
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk_Project_Repo.yml@one-ci-cd
     with:
       repos: frameworks.ai.models.intel-models
-      ref: ${{ github.head_ref }}
+      refs: ${{ github.head_ref }}
       scan_type: monitor
       snyk_org: iags_mlp
       runner_label: k8-runners
