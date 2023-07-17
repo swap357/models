@@ -148,6 +148,7 @@ jobs:
         apt-get install bc
         apt-get -y install git
         apt-get -y install numactl
+        apt-get -y install cpuid
     - name: Define framework folder
       shell: bash
       run: |
@@ -164,6 +165,12 @@ jobs:
             echo "FOLDER=PyTorch" >> "$GITHUB_ENV"
           fi
         fi
+    - name: Check runner AVX capability
+      run: |
+        is_avx=false
+        echo "Checking for avx512 availability"
+        cpuid | grep -q "AVX512" && is_avx=true
+        echo "IS_AVX=$is_avx" >> "$GITHUB_ENV"
     - name: Run ${{ inputs.workload }} tests - Workflow Call
       if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml')
       env:
@@ -172,8 +179,9 @@ jobs:
       run: |
         # Run test for specified workload depending if precision exist (int8, fp16, fp32, bfloat16, bfloat32)
         PRECISIONS=("${{ inputs.precision_1 }}" "${{ inputs.precision_2 }}" "${{ inputs.precision_3 }}" "${{ inputs.precision_4 }}" "${{ inputs.precision_5 }}")
+
         for idx in {0..4}; do
-          if [ "${PRECISIONS["$idx"]}" != "" ]; then
+          if [[ "${PRECISIONS["$idx"]}" != "" && "${PRECISIONS["$idx"]}" != "int8" || ("${PRECISIONS["$idx"]}" == "int8" && ${{ env.IS_AVX }} == true) ]]; then
             ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
             ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${PRECISIONS["$idx"]} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
           fi
