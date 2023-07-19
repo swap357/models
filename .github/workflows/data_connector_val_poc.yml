@@ -30,14 +30,14 @@ jobs:
         conda create --name venv pip python=${{ matrix.python_version }} -c conda-forge --yes --quiet
         conda activate venv
         pip install --upgrade pip wheel setuptools
-        pip install -r ./repo/datasets/data_connector/requirements-test.txt
+        pip install -r ./repo/datasets/cloud_data_connector/requirements-test.txt
         pip list
         pip check
     - name: Dependencies Test
       run: |
         source /opt/conda/etc/profile.d/conda.sh
         conda activate venv
-        conda compare -n venv repo/datasets/data_connector/requirements.txt
+        conda compare -n venv repo/datasets/cloud_data_connector/requirements.txt
         pip check
     - name: Executing AWS Unit Tests
       if: success()
@@ -45,7 +45,7 @@ jobs:
         source /opt/conda/etc/profile.d/conda.sh
         conda activate venv
         cd repo/datasets
-        python${{ matrix.python_version }} -m pytest data_connector/tests/aws
+        python${{ matrix.python_version }} -m pytest cloud_data_connector/tests/aws
         mv test_data/out_report.xml test_data/out_report_aws_${{ matrix.python_version }}.xml
         cd ..
     - name: Executing GCP Unit Tests
@@ -54,7 +54,7 @@ jobs:
         source /opt/conda/etc/profile.d/conda.sh
         conda activate venv
         cd repo/datasets
-        python${{ matrix.python_version }} -m pytest data_connector/tests/gcp
+        python${{ matrix.python_version }} -m pytest cloud_data_connector/tests/gcp
         mv test_data/out_report.xml test_data/out_report_gcp_${{ matrix.python_version }}.xml
         cd ..
     - name: Executing Azure Unit Tests
@@ -63,7 +63,7 @@ jobs:
         source /opt/conda/etc/profile.d/conda.sh
         conda activate venv
         cd repo/datasets
-        python${{ matrix.python_version }} -m pytest data_connector/tests/azure
+        python${{ matrix.python_version }} -m pytest cloud_data_connector/tests/azure
         mv test_data/out_report.xml test_data/out_report_azure_${{ matrix.python_version }}.xml
         cd ..
     - name: Upload Unit Tests Artifacts
@@ -99,18 +99,18 @@ jobs:
         conda create --name venv pip python=${{ matrix.python_version }} -c conda-forge --yes --quiet
         conda activate venv
         pip install --upgrade pip wheel setuptools
-        pip install ./repo/datasets/data_connector/
+        pip install ./repo/datasets/cloud_data_connector/
     - name: Dependencies Test
       run: |
         source /opt/conda/etc/profile.d/conda.sh
         conda activate venv
-        conda compare -n venv repo/datasets/data_connector/requirements.txt
+        conda compare -n venv repo/datasets/cloud_data_connector/requirements.txt
         pip check
     - name: Import Data Connector Test
       run: |
         source /opt/conda/etc/profile.d/conda.sh
         conda activate venv
-        python -c 'import data_connector'
+        python -c 'import cloud_data_connector'
     - name: Executing AWS Functional Test
       if: success()
       env:
@@ -123,7 +123,7 @@ jobs:
         touch file_test.txt
         echo "This is a test!" > file_test.txt
         conda list
-        python repo/datasets/data_connector/samples/aws/functional_test.py $AWS_BUCKET_NAME file_test.txt
+        python repo/datasets/cloud_data_connector/samples/aws/functional_test.py $AWS_BUCKET_NAME file_test.txt
         cat file_test_2.txt
         rm file_test*
     - name: Executing GCP Functional Test
@@ -145,6 +145,6 @@ jobs:
           \"client_x509_cert_url\": \"${{ secrets.GCP_CLIENT_URL }}\"
         }"
         echo "${JSON_STRING}" > credentials.json
-        python repo/datasets/data_connector/samples/gcp/storage.py -p intel-optimized-tensorflow -c credentials.json
-        python repo/datasets/data_connector/samples/gcp/bigquery.py -p intel-optimized-tensorflow -c credentials.json
+        python repo/datasets/cloud_data_connector/samples/gcp/storage.py -p intel-optimized-tensorflow -c credentials.json
+        python repo/datasets/cloud_data_connector/samples/gcp/bigquery.py -p intel-optimized-tensorflow -c credentials.json
         rm credentials.json
