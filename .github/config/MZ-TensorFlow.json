@@ -38,5 +38,31 @@
           "dataset": "",
           "benchmark": "throughput"
         }
+    },
+    {
+      "workload": "resnet50v1.5-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "inference.sh",
+          "precision": ["int8", "fp32", "bfloat16"],
+          "batch_size": 1,
+          "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
+          "benchmark": "latency"
+        }
+    },
+    {
+      "workload": "resnet50v1.5-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "accuracy.sh",
+          "precision": ["int8", "fp32", "bfloat16", "bfloat32"],
+          "batch_size": 100,
+          "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
+          "benchmark": "accuracy"
+        }
     }]
 }
