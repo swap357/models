@@ -41,7 +41,7 @@ jobs:
   aikit_drop:
     runs-on: [ gasp ]
     container:
-      image: python:3.9
+      image: amr-registry.caas.intel.com/aiops/imz-dev-ci:py3.9
       env:
         http_proxy: ${{ secrets.HTTP_PROXY }}
         https_proxy: ${{ secrets.HTTPS_PROXY }}

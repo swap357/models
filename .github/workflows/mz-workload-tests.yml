@@ -121,10 +121,7 @@ jobs:
   test:
     runs-on: [self-hosted, "${{ inputs.runner_label }}"]
     container:
-      image: python:3.8
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USER }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }} 
+      image: amr-registry.caas.intel.com/aiops/imz-dev-ci:py3.8
       env:
         http_proxy: ${{ secrets.HTTP_PROXY }}
         https_proxy: ${{ secrets.HTTPS_PROXY }}
