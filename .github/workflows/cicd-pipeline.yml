@@ -4,12 +4,12 @@ on:
     inputs:
       target_branch:
         description: 'Model Zoo branch name'
-        default: develop
+        default: 'r2.12'
         required: true
         type: string
       mz_version:
         description: 'Model Zoo version'
-        default: '2.11.0'
+        default: '2.12.0'
         required: true
         type: string
       aikit_release:
@@ -41,8 +41,8 @@ jobs:
     needs: [scans, workload-tests]
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop   
     with:
-      target_branch: ${{ inputs.target_branch || 'develop' }}
-      mz_version: ${{ inputs.mz_version || '2.11.0' }}
-      aikit_release: ${{ inputs.aikit_release || '2023.1.1' }}
+      target_branch: ${{ inputs.target_branch || 'r2.12' }}
+      mz_version: ${{ inputs.mz_version || '2.12.0' }}
+      aikit_release: ${{ inputs.aikit_release || '2023.2.0' }}
       is_lkg_drop: ${{ inputs.is_lkg_drop || true }}
     secrets: inherit
