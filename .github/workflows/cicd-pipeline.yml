@@ -23,9 +23,9 @@ on:
         required: true
         type: boolean
   
-  #run job daily on week days at 22:00 PDT
-  #schedule:
-  #  - cron:  '00 22 * * MON-FRI'
+  #run job daily on week days at night US timezone
+  schedule:
+    - cron:  '00 02 * * MON-FRI'
   
   repository_dispatch:
     
