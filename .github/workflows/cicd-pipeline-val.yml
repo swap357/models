@@ -1,0 +1,41 @@
+name: CI/CD Pipeline validation
+on: 
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Model Zoo branch name'
+        default: 'r2.12'
+        required: true
+        type: string
+      mz_version:
+        description: 'Model Zoo version'
+        default: '2.12.0'
+        required: true
+        type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        default: '2023.2.0'
+        required: true
+        type: string
+      is_lkg_drop:
+        description: 'LKG drop flag'
+        default: true
+        required: true
+        type: boolean
+  
+jobs:
+  scans:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yml@develop
+    secrets: inherit
+  workload-tests:
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-launcher.yml@develop
+    secrets: inherit
+  mz-drop:
+    needs: [scans, workload-tests]
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop-dummy.yml@develop   
+    with:
+      target_branch: ${{ inputs.target_branch }}
+      mz_version: ${{ inputs.mz_version }}
+      aikit_release: ${{ inputs.aikit_release }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop }}
+    secrets: inherit
