@@ -24,8 +24,9 @@ on:
         type: boolean
   
   #run job daily on week days at night US timezone
-  schedule:
-    - cron:  '00 02 * * MON-FRI'
+  #Disabled per Tran's request
+  #schedule:
+  #  - cron:  '00 02 * * MON-FRI'
   
   repository_dispatch:
     
