@@ -5,17 +5,18 @@ on:
   workflow_call:
 
 jobs:
-  scan-snyk:
-    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk_Project_Repo.yml@one-ci-cd
-    with:
-      repos: frameworks.ai.models.intel-models
-      refs: ${{ github.head_ref }}
-      scan_type: monitor
-      snyk_org: iags_mlp
-      runners: "[ 'k8-runners' ]"
-    secrets:
-      SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
-      token: ${{ secrets.GITHUB_TOKEN }}
+  #Temporarily disabling Snyk scanner
+  #scan-snyk:
+  #  uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Snyk_Project_Repo.yml@one-ci-cd
+  #  with:
+  #    repos: frameworks.ai.models.intel-models
+  #    refs: ${{ github.head_ref }}
+  #    scan_type: monitor
+  #    snyk_org: iags_mlp
+  #    runners: "[ 'k8-runners' ]"
+  #  secrets:
+  #    SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+  #    token: ${{ secrets.GITHUB_TOKEN }}
   scan-coverity:
     uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Coverity.yml@one-ci-cd
     with:
