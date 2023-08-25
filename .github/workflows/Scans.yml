@@ -12,7 +12,7 @@ jobs:
       refs: ${{ github.head_ref }}
       scan_type: monitor
       snyk_org: iags_mlp
-      runner_label: k8-runners
+      runners: "['self-hosted', 'Linux', 'k8-runners']"
     secrets:
       SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
@@ -24,7 +24,7 @@ jobs:
       projectType: python
       url: https://coverityent.devtools.intel.com/prod8
       stream: model_zoo_first_test
-      runner_label: k8-runners
+      runners: "['self-hosted', 'Linux', 'k8-runners']"
     secrets:
       USER: tf_qa_prod
       PASSWORD: ${{ secrets.TF_QA_PROD }}
