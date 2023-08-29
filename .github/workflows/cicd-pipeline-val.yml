@@ -4,7 +4,7 @@ on:
     inputs:
       target_branch:
         description: 'Model Zoo branch name'
-        default: 'r2.12'
+        default: 'develop'
         required: true
         type: string
       mz_version:
@@ -14,7 +14,7 @@ on:
         type: string
       aikit_release:
         description: 'Target AIKit version'
-        default: '2023.2.0'
+        default: '2024.0.0'
         required: true
         type: string
       is_lkg_drop:
