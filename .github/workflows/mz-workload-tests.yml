@@ -2,18 +2,15 @@ name: Model Zoo Workload Tests
 on:
   workflow_dispatch:
     inputs:
-      target-branch:
-        default: develop
-        required: true
-        type: string
       runner_label:
         required: true
-        default: Linux
+        default: tf_dataset
         type: choice
         options:
         - pvc
         - atsm
-        - Linux
+        - tf_dataset
+        - pytorch
       workload:
         required: true
         default: resnet50v1.5-inference
@@ -33,9 +30,9 @@ on:
         required: true
         default: inference_throughput_multi_instance.sh
         type: string
-      precision:
+      precisions:
         required: true
-        default: fp32
+        default: "['int8','fp32','bfloat16','bfloat32']"
         type: string
       dataset:
         required: false
@@ -74,22 +71,7 @@ on:
         description: 'Target AIKit version'
         required: true
         type: string
-      precision_1:
-        required: true
-        type: string
-      precision_2:
-        required: false
-        type: string
-      precision_3:
-        required: false
-        type: string
-      precision_4:
-        required: false
-        type: string
-      precision_5:
-        required: false
-        type: string
-      batch_size:
+      precisions:
         required: true
         type: string
       dataset:
@@ -98,19 +80,7 @@ on:
       benchmark:
         required: false
         type: string
-      benchmark_threshold_1:
-        required: false
-        type: string
-      benchmark_threshold_2:
-        required: false
-        type: string
-      benchmark_threshold_3:
-        required: false
-        type: string
-      benchmark_threshold_4:
-        required: false
-        type: string
-      benchmark_threshold_5:
+      thresholds:
         required: false
         type: string
       tolerance:
@@ -119,7 +89,7 @@ on:
 
 jobs:
   test:
-    runs-on: [self-hosted, "${{ inputs.runner_label }}"]
+    runs-on: [self-hosted, Linux, "${{ inputs.runner_label }}"]
     container:
       image: amr-registry.caas.intel.com/aiops/imz-dev-ci:py3.8
       env:
@@ -134,6 +104,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Checkout OneAPI Tools Repository
+      if: inputs.is_lkg_drop == 'true'
       uses: actions/checkout@v3
       with:
         repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
@@ -142,10 +113,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt-get update
-        apt-get install bc
-        apt-get -y install git
-        apt-get -y install numactl
-        apt-get -y install cpuid
+        apt-get install bc numactl -y
     - name: Define framework folder
       shell: bash
       run: |
@@ -168,31 +136,32 @@ jobs:
         echo "Checking for avx512 availability"
         cpuid | grep -q "AVX512" && is_avx=true
         echo "IS_AVX=$is_avx" >> "$GITHUB_ENV"
-    - name: Run ${{ inputs.workload }} tests - Workflow Call
-      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml')
+    - name: Run ${{ inputs.workload }} ${{ inputs.script }} test
       env:
         TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
       shell: bash
       run: |
         # Run test for specified workload depending if precision exist (int8, fp16, fp32, bfloat16, bfloat32)
-        PRECISIONS=("${{ inputs.precision_1 }}" "${{ inputs.precision_2 }}" "${{ inputs.precision_3 }}" "${{ inputs.precision_4 }}" "${{ inputs.precision_5 }}")
-
-        for idx in {0..4}; do
-          if [[ "${PRECISIONS["$idx"]}" != "" && "${PRECISIONS["$idx"]}" != "int8" || ("${PRECISIONS["$idx"]}" == "int8" && ${{ env.IS_AVX }} == true) ]]; then
-            ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
-            ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${PRECISIONS["$idx"]} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
+        ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
+        IFS=',()][' read -a PRECISIONS <<< ${{ inputs.precisions }}
+        for PRECISION in "${PRECISIONS[@]:1}"; do
+          if [[ "${PRECISION}" != "" && "${PRECISIONS["$idx"]}" != "int8" || ("${PRECISION}" == "int8" && ${{ env.IS_AVX }} == true) ]]; then
+            ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${PRECISION} ${{ inputs.script }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }} ${{ inputs.dataset }}
           fi
         done
-    - name: Run ${{ inputs.workload }} tests - Workflow Dispatch
-      if: github.event_name == 'workflow_dispatch' && contains(github.event.workflow, 'mz-workload-tests.yml')
-      env:
-        TF_QA_PROD: ${{ secrets.TF_QA_PROD }}
-      shell: bash
-      run: |
-        ./tests/cicd/${{ env.FOLDER }}/setup.sh ${{ inputs.framework_version }} ${{ inputs.is_lkg_drop }} ${GITHUB_WORKSPACE} ${{ inputs.aikit_release }}
-        ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${{ inputs.precision }} ${{ inputs.script }} ${{ inputs.dataset }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }}
     - if: success() || failure()
       uses: actions/upload-artifact@v3
       with:
         name: workload-results
-        path: tests/cicd/${{ env.FOLDER }}/output/*
+        path: tests/cicd/output/*
+    - name: Check performance
+      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml')
+      uses: ./.github/actions/check-performance
+      with:
+        output_folder: ${GITHUB_WORKSPACE}/tests/cicd/output
+        workload: ${{ inputs.workload }}
+        script: ${{ inputs.script }}
+        benchmark_type: ${{ inputs.benchmark }}
+        precisions: ${{ inputs.precisions }}
+        thresholds: ${{ inputs.thresholds }}
+        tolerance: ${{ inputs.tolerance }}

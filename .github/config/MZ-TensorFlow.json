@@ -8,35 +8,10 @@
         {
           "script": "inference_realtime_multi_instance.sh",
           "precision": ["int8", "fp32", "bfloat16", "bfloat32"],
-          "batch_size": 1,
           "dataset": "",
-          "benchmark": "latency"
-        }
-    },
-    {
-      "workload": "resnet50v1.5-inference",
-      "framework": "tensorflow",
-      "framework_version": "2.12.0",
-      "test":
-        {
-          "script": "inference_realtime_weightsharing.sh",
-          "precision": ["int8", "bfloat16"],
-          "batch_size": 1,
-          "dataset": "",
-          "benchmark": "latency"
-        }
-    },
-    {
-      "workload": "resnet50v1.5-inference",
-      "framework": "tensorflow",
-      "framework_version": "2.12.0",
-      "test":
-        {
-          "script": "inference_throughput_multi_instance.sh",
-          "precision": ["int8", "fp32", "bfloat16", "bfloat32"],
-          "batch_size": 80,
-          "dataset": "",
-          "benchmark": "throughput"
+          "benchmark": "latency",
+          "threshold": [38, 72, 143, 42],
+          "tolerance": 0.05
         }
     },
     {
@@ -47,9 +22,38 @@
         {
           "script": "inference.sh",
           "precision": ["int8", "fp32", "bfloat16"],
-          "batch_size": 1,
           "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
-          "benchmark": "latency"
+          "benchmark": "throughput",
+          "threshold": [181, 89, 50],
+          "tolerance": 0.05
+        }
+    },
+    {
+      "workload": "resnet50v1.5-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "inference_realtime_weightsharing.sh",
+          "precision": ["int8", "bfloat16"],
+          "dataset": "",
+          "benchmark": "throughput",
+          "threshold": [311, 48],
+          "tolerance": 0.05
+        }
+    },
+    {
+      "workload": "resnet50v1.5-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "inference_throughput_multi_instance.sh",
+          "precision": ["int8", "fp32", "bfloat16", "bfloat32"],
+          "dataset": "",
+          "benchmark": "throughput",
+          "threshold": [227, 322, 144, 461],
+          "tolerance": 0.05
         }
     },
     {
@@ -60,9 +64,66 @@
         {
           "script": "accuracy.sh",
           "precision": ["int8", "fp32", "bfloat16", "bfloat32"],
-          "batch_size": 100,
           "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
-          "benchmark": "accuracy"
+          "benchmark": "accuracy",
+          "threshold": [0.92, 0.93, 0.93, 0.93],
+          "tolerance": 0.05
+        }
+    },
+    {
+      "workload": "mobilenetv1-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "accuracy.sh",
+          "precision": ["int8", "fp32", "bfloat32"],
+          "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
+          "benchmark": "accuracy",
+          "threshold": [0.86, 0.9, 0.9],
+          "tolerance": 0.05
+        }
+    },
+    {
+      "workload": "mobilenetv1-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "inference.sh",
+          "precision": ["int8", "fp32"],
+          "dataset": "/tf_dataset/dataset/TF_Imagenet_FullData",
+          "benchmark": "throughput",
+          "threshold": [14, 9],
+          "tolerance": 0.05
+        }
+    },
+    {
+      "workload": "mobilenetv1-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "inference_realtime_multi_instance.sh",
+          "precision": ["int8", "fp32", "bfloat32"],
+          "dataset": "",
+          "benchmark": "throughput",
+          "threshold": [458, 188, 103],
+          "tolerance": 0.05
+        }
+    },
+    {
+      "workload": "mobilenetv1-inference",
+      "framework": "tensorflow",
+      "framework_version": "2.12.0",
+      "test":
+        {
+          "script": "inference_throughput_multi_instance.sh",
+          "precision": ["int8", "fp32", "bfloat32"],
+          "dataset": "",
+          "benchmark": "throughput",
+          "threshold": [1363, 1202, 1972],
+          "tolerance": 0.05
         }
     }]
 }

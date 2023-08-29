@@ -2,12 +2,20 @@ name: Model Zoo Workload Tests Launcher
 on:
   pull_request:
     branches: [develop]
-  
   workflow_call:
+    inputs:
+      aikit_release:
+          description: 'Target AIKit version'
+          required: true
+          type: string
+      is_lkg_drop:
+        description: 'LKG drop flag'
+        required: true
+        type: boolean
 
 jobs:
   setup:
-    runs-on: [self-hosted, tf_dataset, Linux]
+    runs-on: [self-hosted, gasp]
     outputs:
       tensorflow-tests: ${{ steps.set-input.outputs.TENSORFLOW_TESTS }}
       pytorch-tests: ${{ steps.set-input.outputs.PYTORCH_TESTS }}
@@ -37,15 +45,13 @@ jobs:
       framework: ${{ matrix.tests_arr.framework }}
       framework_version: ${{ matrix.tests_arr.framework_version }}
       script: ${{ matrix.tests_arr.test.script }}
-      is_lkg_drop: true
-      aikit_release: "2023.2.0"
-      precision_1: ${{ matrix.tests_arr.test.precision[0] }}
-      precision_2: ${{ matrix.tests_arr.test.precision[1] }}
-      precision_3: ${{ matrix.tests_arr.test.precision[2] }}
-      precision_4: ${{ matrix.tests_arr.test.precision[3] }}
-      precision_5: ${{ matrix.tests_arr.test.precision[4] }}
-      batch_size: ${{ matrix.tests_arr.test.batch_size }}
+      aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
+      precisions: "['${{ matrix.tests_arr.test.precision[0] }}','${{ matrix.tests_arr.test.precision[1] }}','${{ matrix.tests_arr.test.precision[2] }}','${{ matrix.tests_arr.test.precision[3] }}','${{ matrix.tests_arr.test.precision[4] }}']"
       dataset: ${{ matrix.tests_arr.test.dataset }}
+      benchmark: ${{ matrix.tests_arr.test.benchmark }}
+      thresholds: "['${{ matrix.tests_arr.test.threshold[0] }}','${{ matrix.tests_arr.test.threshold[1] }}','${{ matrix.tests_arr.test.threshold[2] }}','${{ matrix.tests_arr.test.threshold[3] }}','${{ matrix.tests_arr.test.threshold[4] }}']"
+      tolerance: ${{ matrix.tests_arr.test.tolerance }}
 
   test-PYTORCH:
     secrets: inherit
@@ -61,12 +67,16 @@ jobs:
       framework: ${{ matrix.tests_arr.framework }}
       framework_version: ${{ matrix.tests_arr.framework_version }}
       script: ${{ matrix.tests_arr.test.script }}
-      is_lkg_drop: true
-      aikit_release: "2023.2.0"
-      precision_1: ${{ matrix.tests_arr.test.precision[0] }}
-      precision_2: ${{ matrix.tests_arr.test.precision[1] }}
-      precision_3: ${{ matrix.tests_arr.test.precision[2] }}
-      precision_4: ${{ matrix.tests_arr.test.precision[3] }}
-      precision_5: ${{ matrix.tests_arr.test.precision[4] }}
-      batch_size: ${{ matrix.tests_arr.test.batch_size }}
+      aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
+      precisions: "['${{ matrix.tests_arr.test.precision[0] }}','${{ matrix.tests_arr.test.precision[1] }}','${{ matrix.tests_arr.test.precision[2] }}','${{ matrix.tests_arr.test.precision[3] }}','${{ matrix.tests_arr.test.precision[4] }}']"
       dataset: ${{ matrix.tests_arr.test.dataset }}
+      benchmark: ${{ matrix.tests_arr.test.benchmark }}
+      thresholds: "['${{ matrix.tests_arr.test.threshold[0] }}','${{ matrix.tests_arr.test.threshold[1] }}','${{ matrix.tests_arr.test.threshold[2] }}','${{ matrix.tests_arr.test.threshold[3] }}','${{ matrix.tests_arr.test.threshold[4] }}']"
+      tolerance: ${{ matrix.tests_arr.test.tolerance }}
+
+  display-results:
+    if: github.event_name != 'pull_request' || contains(github.event.workflow, 'cicd-pipeline')
+    secrets: inherit
+    needs: [test-TENSORFLOW, test-PYTORCH]
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-performance.yml@develop

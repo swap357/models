@@ -1,0 +1,44 @@
+name: Model Zoo Workload Tests Performance
+on:
+  workflow_call:
+jobs:
+  performance:
+    runs-on: [self-hosted, gasp]
+    container:
+      image: amr-registry.caas.intel.com/aiops/mlops:ubuntu-22.04
+      env:
+        http_proxy: ${{ secrets.HTTP_PROXY }}
+        https_proxy: ${{ secrets.HTTPS_PROXY }}
+        no_proxy: ${{ secrets.NO_PROXY }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install python3-pip -y
+        pip install pandas tabulate
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: workload-performances
+        path: .github/utils/performances
+    - name: Display Table
+      shell: bash
+      run: |
+        cd .github/utils
+        export GITHUB_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+        python3 create-md-table.py ${GITHUB_URL}
+        MD_TABLE=$(cat result_summary_table.md)
+        echo "## Performance Tests" >> $GITHUB_STEP_SUMMARY
+        echo "${MD_TABLE}" >> $GITHUB_STEP_SUMMARY
+    - name: Send results to Grafana
+      uses: intel-innersource/frameworks.ai.platform.mt-whitney-validation/.github/actions/database-uploader@develop
+      with:
+        db_user: tester
+        db_table: wl_perf_mz
+        db: resultsdb
+        file: .github/utils/result_summary_table.json
+      env: 
+        DB_PASS: ${{ secrets.DB_PASS }}
+        DB_SERVER: ${{ secrets.DB_SERVER }}

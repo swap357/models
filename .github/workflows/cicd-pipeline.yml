@@ -1,5 +1,5 @@
 name: CI/CD Pipeline
-on: 
+on:
   workflow_dispatch:
     inputs:
       target_branch:
@@ -30,6 +30,9 @@ jobs:
   workload-tests:
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-launcher.yml@develop
     secrets: inherit
+    with:
+      aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
+      is_lkg_drop: ${{ inputs.is_lkg_drop || true }}
   mz-drop:
     #if: ${{ always() && needs.scan-snyk.result=='success'  && needs.workload-tests.result=='success' }}
     needs: [scans, workload-tests]
