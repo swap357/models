@@ -104,7 +104,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Checkout OneAPI Tools Repository
-      if: inputs.is_lkg_drop == 'true'
+      if: inputs.is_lkg_drop
       uses: actions/checkout@v3
       with:
         repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
