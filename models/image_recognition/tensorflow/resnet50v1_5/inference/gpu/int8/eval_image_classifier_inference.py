@@ -107,7 +107,14 @@ class eval_classifier_optimized_graph:
     arg_parser.add_argument("--benchmark",
                             help='Run in benchmark mode.',
                             dest='benchmark', action='store_true')
+<<<<<<< HEAD
 
+=======
+    arg_parser.add_argument("--onednn-graph", 
+                            dest='onednn_graph',
+                            help='enable OneDNN Graph',
+                            action='store_true')
+>>>>>>> 1a238572f (Container GHA Pipeline Reformat (#1462))
     self.args = arg_parser.parse_args()
     # validate the arguements
     self.validate_args()
