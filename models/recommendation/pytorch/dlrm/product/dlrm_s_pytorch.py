@@ -748,7 +748,7 @@ class DLRM_Net(nn.Module):
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
         # bottom mlp
         x = self.apply_mlp(dense_x, self.bot_l)
-        ext_dist.barrier()
+        # ext_dist.barrier()
         ly_sparse = a2a_req.wait()
         _ly = []
         vector_lenght = 128
