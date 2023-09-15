@@ -74,12 +74,8 @@ docker run \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
-<<<<<<< HEAD
-  --volume IMAGE_FILE:${IMAGE_FILE} \
-=======
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${IMAGE_FILE}:${IMAGE_FILE} \
->>>>>>> 1a238572f (Container GHA Pipeline Reformat (#1462))
   --rm -it \
   $IMAGE_NAME \
   /bin/bash quickstart/batch_inference.sh

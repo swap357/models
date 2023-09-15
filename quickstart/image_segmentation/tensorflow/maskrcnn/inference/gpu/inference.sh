@@ -21,11 +21,8 @@ echo 'MODEL_DIR='$MODEL_DIR
 echo 'PRECISION='$PRECISION
 echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo 'BATCH_SIZE='$BATCH_SIZE
-<<<<<<< HEAD
-=======
 echo 'GPU_TYPE='$GPU_TYPE
 
->>>>>>> 1a238572f (Container GHA Pipeline Reformat (#1462))
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
