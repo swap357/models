@@ -18,4 +18,4 @@
 #
 
 # This is for testing aikit integration, may delete eventually
-export MODEL_ZOO_VERSION=2.11.0
+export MODEL_ZOO_VERSION=3.0

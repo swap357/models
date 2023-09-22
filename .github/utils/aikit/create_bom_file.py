@@ -41,7 +41,7 @@ def generate_bom_file(bom_file_name, drop_delivery_dir, component):
         if "conda_channel" in f:
             install_name = f.replace(drop_delivery_dir,"<installdir>")
         else:
-            install_name = f.replace(drop_delivery_dir,"<installdir>/"+component+"/<version>")
+            install_name = f.replace(drop_delivery_dir,"<installdir>/"+component)
         file_cksum = get_cksum(f)
         file_permission = "755" if f.endswith(".sh") or f.endswith(".py") else "644"
         line = delivery_name + "\t" + install_name + "\t" + file_cksum + "\t" + file_origin + "\t" + file_permission + "\n"
