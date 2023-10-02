@@ -74,6 +74,7 @@ jobs:
       tolerance: ${{ matrix.tests_arr.test.tolerance }}
 
   display-results:
-    if: (github.event_name != 'pull_request' || contains(github.event.workflow, 'cicd-pipeline')) && needs.test-TENSORFLOW.result=='success' && needs.test-PYTORCH.result=='success' 
+    if: github.event_name != 'pull_request' || contains(github.event.workflow, 'cicd-pipeline') 
+    needs: [test-TENSORFLOW, test-PYTORCH]
     secrets: inherit
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-performance.yml@develop
