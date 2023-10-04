@@ -146,6 +146,7 @@ jobs:
         IFS=',()][' read -a PRECISIONS <<< ${{ inputs.precisions }}
         for PRECISION in "${PRECISIONS[@]:1}"; do
           if [[ "${PRECISION}" != "" && "${PRECISIONS["$idx"]}" != "int8" || ("${PRECISION}" == "int8" && ${{ env.IS_AVX }} == true) ]]; then
+            echo "Running ${{ inputs.script }} with precision ${PRECISION}"
             ./tests/cicd/${{ env.FOLDER }}/${{ inputs.workload }}/run_test.sh ${PRECISION} ${{ inputs.script }} ${GITHUB_WORKSPACE} ${{ inputs.is_lkg_drop }} ${{ inputs.dataset }}
           fi
         done
@@ -160,8 +161,10 @@ jobs:
       with:
         output_folder: ${GITHUB_WORKSPACE}/tests/cicd/output
         workload: ${{ inputs.workload }}
+        framework: ${{ inputs.framework }}
         script: ${{ inputs.script }}
         benchmark_type: ${{ inputs.benchmark }}
         precisions: ${{ inputs.precisions }}
         thresholds: ${{ inputs.thresholds }}
         tolerance: ${{ inputs.tolerance }}
+        token: ${{ secrets.GITHUB_TOKEN }}

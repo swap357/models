@@ -24,10 +24,10 @@ jobs:
       id: set-input
       run: |
         # Read input json file objects and define them as a matrix
-        echo "TENSORFLOW_TESTS=$(jq -c '.data' .github/config/MZ-TensorFlow.json)" >> $GITHUB_OUTPUT
-        # echo "ITEX_XPU_TESTS=$(jq -c '.data' .github/config/MZ-ITEX-XPU.json)" >> $GITHUB_OUTPUT
-        # echo "IPEX_XPU_TESTS=$(jq -c '.data' .github/config/MZ-IPEX-XPU.json)" >> $GITHUB_OUTPUT
-        echo "PYTORCH_TESTS=$(jq -c '.data' .github/config/MZ-PyTorch.json)" >> $GITHUB_OUTPUT
+        echo "TENSORFLOW_TESTS=$(jq -c '.tests' .github/config/MZ-TensorFlow.json)" >> $GITHUB_OUTPUT
+        # echo "ITEX_XPU_TESTS=$(jq -c '.tests' .github/config/MZ-ITEX-XPU.json)" >> $GITHUB_OUTPUT
+        # echo "IPEX_XPU_TESTS=$(jq -c '.tests' .github/config/MZ-IPEX-XPU.json)" >> $GITHUB_OUTPUT
+        echo "PYTORCH_TESTS=$(jq -c '.tests' .github/config/MZ-PyTorch.json)" >> $GITHUB_OUTPUT
 
   test-TENSORFLOW:
     secrets: inherit
@@ -42,14 +42,14 @@ jobs:
       workload: ${{ matrix.tests_arr.workload }}
       framework: ${{ matrix.tests_arr.framework }}
       framework_version: ${{ matrix.tests_arr.framework_version }}
-      script: ${{ matrix.tests_arr.test.script }}
       aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
       is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
-      precisions: "['${{ matrix.tests_arr.test.precision[0] }}','${{ matrix.tests_arr.test.precision[1] }}','${{ matrix.tests_arr.test.precision[2] }}','${{ matrix.tests_arr.test.precision[3] }}','${{ matrix.tests_arr.test.precision[4] }}']"
-      dataset: ${{ matrix.tests_arr.test.dataset }}
-      benchmark: ${{ matrix.tests_arr.test.benchmark }}
-      thresholds: "['${{ matrix.tests_arr.test.threshold[0] }}','${{ matrix.tests_arr.test.threshold[1] }}','${{ matrix.tests_arr.test.threshold[2] }}','${{ matrix.tests_arr.test.threshold[3] }}','${{ matrix.tests_arr.test.threshold[4] }}']"
-      tolerance: ${{ matrix.tests_arr.test.tolerance }}
+      script: ${{ matrix.tests_arr.script }}
+      precisions: "['${{ matrix.tests_arr.precision[0] }}','${{ matrix.tests_arr.precision[1] }}','${{ matrix.tests_arr.precision[2] }}','${{ matrix.tests_arr.precision[3] }}','${{ matrix.tests_arr.precision[4] }}']"
+      dataset: ${{ matrix.tests_arr.dataset }}
+      benchmark: ${{ matrix.tests_arr.benchmark }}
+      thresholds: "['${{ matrix.tests_arr.threshold[0] }}','${{ matrix.tests_arr.threshold[1] }}','${{ matrix.tests_arr.threshold[2] }}','${{ matrix.tests_arr.threshold[3] }}','${{ matrix.tests_arr.threshold[4] }}']"
+      tolerance: ${{ matrix.tests_arr.tolerance }}
 
   test-PYTORCH:
     secrets: inherit
@@ -64,14 +64,14 @@ jobs:
       workload: ${{ matrix.tests_arr.workload }}
       framework: ${{ matrix.tests_arr.framework }}
       framework_version: ${{ matrix.tests_arr.framework_version }}
-      script: ${{ matrix.tests_arr.test.script }}
       aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
       is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
-      precisions: "['${{ matrix.tests_arr.test.precision[0] }}','${{ matrix.tests_arr.test.precision[1] }}','${{ matrix.tests_arr.test.precision[2] }}','${{ matrix.tests_arr.test.precision[3] }}','${{ matrix.tests_arr.test.precision[4] }}']"
-      dataset: ${{ matrix.tests_arr.test.dataset }}
-      benchmark: ${{ matrix.tests_arr.test.benchmark }}
-      thresholds: "['${{ matrix.tests_arr.test.threshold[0] }}','${{ matrix.tests_arr.test.threshold[1] }}','${{ matrix.tests_arr.test.threshold[2] }}','${{ matrix.tests_arr.test.threshold[3] }}','${{ matrix.tests_arr.test.threshold[4] }}']"
-      tolerance: ${{ matrix.tests_arr.test.tolerance }}
+      script: ${{ matrix.tests_arr.script }}
+      precisions: "['${{ matrix.tests_arr.precision[0] }}','${{ matrix.tests_arr.precision[1] }}','${{ matrix.tests_arr.precision[2] }}','${{ matrix.tests_arr.precision[3] }}','${{ matrix.tests_arr.precision[4] }}']"
+      dataset: ${{ matrix.tests_arr.dataset }}
+      benchmark: ${{ matrix.tests_arr.benchmark }}
+      thresholds: "['${{ matrix.tests_arr.threshold[0] }}','${{ matrix.tests_arr.threshold[1] }}','${{ matrix.tests_arr.threshold[2] }}','${{ matrix.tests_arr.threshold[3] }}','${{ matrix.tests_arr.threshold[4] }}']"
+      tolerance: ${{ matrix.tests_arr.tolerance }}
 
   display-results:
     if: github.event_name != 'pull_request' || contains(github.event.workflow, 'cicd-pipeline') 
