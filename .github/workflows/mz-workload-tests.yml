@@ -99,7 +99,6 @@ jobs:
       volumes:
         - /tf_dataset/:/tf_dataset/
       options: --privileged
-    continue-on-error: true
     steps:
     - name: Checkout
       uses: actions/checkout@v3
