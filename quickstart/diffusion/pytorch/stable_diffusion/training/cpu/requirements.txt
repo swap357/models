@@ -1,6 +1,0 @@
-accelerate==0.17.1
-torchvision
-transformers>=4.25.1
-ftfy
-tensorboard
-Jinja2
