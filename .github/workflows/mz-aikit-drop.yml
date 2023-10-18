@@ -67,7 +67,8 @@ jobs:
 
       - name: Create model zoo bits
         run: |
-          cd ${GITHUB_WORKSPACE}/modelzoo/.github/utils/aikit
+          ls ${GITHUB_WORKSPACE}
+          cd ${GITHUB_WORKSPACE}/.github/utils/aikit
           ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
       - name: Drop to artifacory
         run: |
