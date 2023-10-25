@@ -107,7 +107,8 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
-        token: ${{ secrets.SYSTFQABOT_TOKEN }}
+        token: ${{ github.token }}
+        #token: ${{ secrets.SYSTFQABOT_TOKEN }}
         path: oneapi_drop_tool
     - name: Install dependencies
       run: |
