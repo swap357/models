@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-tests.yml@develop
     with:
-      runner_label: tf_dataset
+      runner_label: k8-runners
       workload: ${{ matrix.tests_arr.workload }}
       framework: ${{ matrix.tests_arr.framework }}
       framework_version: ${{ matrix.tests_arr.framework_version }}
