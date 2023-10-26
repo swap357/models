@@ -71,15 +71,19 @@ jobs:
           ls -a ${GITHUB_WORKSPACE}
           pwd
           ls -a
+          git status
           cd ${GITHUB_WORKSPACE}/.github/utils/aikit
+          ls -a
+          git status
           echo ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
           cat create_mz_bits.sh
           ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
-      - name: Drop to artifacory
-        run: |
-          echo "Drop MZ bits to Artifactory for AIKit version ${{ inputs.aikit_release }} ..."
-          cd ${GITHUB_WORKSPACE}/oneapi_drop_tool
-          git submodule update --init --remote --recursive
-          python -m pip install -r requirements.txt
-          MZ_DROP_LOCATION="${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.mz_version }}-${{ inputs.aikit_release }}-drop"
-          python cdt.py --user=tf_qa_prod --password=${{ secrets.TF_QA_PROD }} drop -p MZ -r ${{inputs.aikit_release}} -c l_drop -cd $MZ_DROP_LOCATION -b $MZ_DROP_LOCATION/boms/l_modelzoo.txt
+      #Temporarily disabled for debugging model zoo bits issue
+      #- name: Drop to artifacory
+      #  run: |
+      #    echo "Drop MZ bits to Artifactory for AIKit version ${{ inputs.aikit_release }} ..."
+      #    cd ${GITHUB_WORKSPACE}/oneapi_drop_tool
+      #    git submodule update --init --remote --recursive
+      #    python -m pip install -r requirements.txt
+      #    MZ_DROP_LOCATION="${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.mz_version }}-${{ inputs.aikit_release }}-drop"
+      #    python cdt.py --user=tf_qa_prod --password=${{ secrets.TF_QA_PROD }} drop -p MZ -r ${{inputs.aikit_release}} -c l_drop -cd $MZ_DROP_LOCATION -b $MZ_DROP_LOCATION/boms/l_modelzoo.txt
