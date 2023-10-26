@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 MZ_VERSION=$1
 AIKIT_VERSION=$2
@@ -34,11 +33,9 @@ else
     rm -rf ${WORKSPACE}/${DROP_NAME}/boms/*
 fi
 
-cd ${WORKSPACE}/.github/utils/aikit
+cd ${WORKSPACE}/develop/.github/utils/aikit
 python create_bom_file.py --drop_delivery_dir ${WORKSPACE}/${DROP_NAME}
 
 echo ""
 echo "Successfully created Model Zoo bits in ${WORKSPACE}/${DROP_NAME}"
 echo ""
-
-set +x
