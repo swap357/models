@@ -71,6 +71,7 @@ jobs:
           ls -a ${GITHUB_WORKSPACE}
           pwd
           ls -a
+          cd ${GITHUB_WORKSPACE}/.github/utils/aikit
           echo ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
           cat create_mz_bits.sh
           ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
