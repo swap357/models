@@ -10,12 +10,12 @@ on:
         type: string
       mz_version:
         description: 'Model zoo version'
-        default: '2.11.0'
+        default: '3.0.0'
         required: true
         type: string
       aikit_release:
         description: 'Target AIKit version'
-        default: '2023.2.0'
+        default: '2024.0.0'
         required: true
         type: string
   workflow_call:
@@ -76,7 +76,7 @@ jobs:
           cd ${GITHUB_WORKSPACE}/.github/utils/aikit
           pwd
           ls -a
-          echo ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
+          echo ./create_mz_bits.sh ${{ inputs.mz_version }} *** ${{ inputs.aikit_release }} *** ${GITHUB_WORKSPACE}
           ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
       - name: Drop to artifacory
         run: |
