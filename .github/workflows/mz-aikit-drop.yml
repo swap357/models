@@ -50,7 +50,14 @@ jobs:
     continue-on-error: false
 
     steps:
-      - name: Checkout MZ Repository
+      - name: Checkout MZ Repository [develop]
+        uses: actions/checkout@v3
+        with:
+          repository: intel-innersource/frameworks.ai.models.intel-models
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: develop
+
+      - name: Checkout MZ Repository [target]
         uses: actions/checkout@v3
         with:
           repository: intel-innersource/frameworks.ai.models.intel-models
@@ -67,18 +74,12 @@ jobs:
 
       - name: Create model zoo bits
         run: |
-          echo ${GITHUB_WORKSPACE}
           ls -a ${GITHUB_WORKSPACE}
-          pwd
-          ls -a
-          git config --global --add safe.directory /__w/frameworks.ai.models.intel-models/frameworks.ai.models.intel-models
-          git status
-          cd ${GITHUB_WORKSPACE}/.github/utils/aikit
+          cd ${GITHUB_WORKSPACE}/develop/.github/utils/aikit
           ls -a
           git status
-          echo ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
-          cat create_mz_bits.sh
           ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
+
       #Temporarily disabled for debugging model zoo bits issue
       #- name: Drop to artifacory
       #  run: |
