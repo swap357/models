@@ -69,14 +69,10 @@ jobs:
         run: |
           echo ${GITHUB_WORKSPACE}
           ls -a ${GITHUB_WORKSPACE}
-          echo ${GITHUB_WORKSPACE}/.github
-          ls -a ${GITHUB_WORKSPACE}/.github
-          echo ${GITHUB_WORKSPACE}/.github/*
-          ls -a ${GITHUB_WORKSPACE}/.github/*
-          cd ${GITHUB_WORKSPACE}/.github/utils/aikit
           pwd
           ls -a
-          echo ./create_mz_bits.sh ${{ inputs.mz_version }} *** ${{ inputs.aikit_release }} *** ${GITHUB_WORKSPACE}
+          echo ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
+          cat create_mz_bits.sh
           ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
       - name: Drop to artifacory
         run: |
