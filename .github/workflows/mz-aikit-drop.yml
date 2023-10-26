@@ -71,6 +71,7 @@ jobs:
           ls -a ${GITHUB_WORKSPACE}
           pwd
           ls -a
+          git config --global --add safe.directory /__w/frameworks.ai.models.intel-models/frameworks.ai.models.intel-models
           git status
           cd ${GITHUB_WORKSPACE}/.github/utils/aikit
           ls -a
