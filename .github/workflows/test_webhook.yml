@@ -1,0 +1,24 @@
+name: CI/CD Pipeline
+on:
+  repository_dispatch
+  
+jobs:
+  scans:
+    runs-on: [ self-hosted ]
+    steps:
+      - name: Extract context information
+        run: echo "${{ toJSON(github) }}" 1>/dev/null
+  
+  workload-tests:   
+    runs-on: [ self-hosted ]
+    steps:
+      -  name: Workload tests
+         run: echo "Workload tests succeeded"
+      
+  mz-drop:
+    if: ${{ always() && needs.scans.result=='success' && needs.workload-tests.result=='success' }}
+    runs-on: [ self-hosted ]
+    needs: [scans, workload-tests]
+    steps: 
+      - name: Model Zoo dummy drop
+        run: echo "New drop for Model Zoo deployed!!!"
