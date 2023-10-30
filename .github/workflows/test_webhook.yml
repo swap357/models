@@ -1,6 +1,7 @@
-name: CI/CD Pipeline
+name: Webhook test
 on:
-  repository_dispatch
+  repository_dispatch:
+    types: [ new_ipex_installer ]
   
 jobs:
   scans:
