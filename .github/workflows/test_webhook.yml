@@ -23,3 +23,10 @@ jobs:
     steps: 
       - name: Model Zoo dummy drop
         run: echo "New drop for Model Zoo deployed!!!"
+      - name: Notify AI Tool Bundle repository of new IMZ drop
+        run: |
+          curl --request POST \
+          --url https://api.github.com/repos/intel-innersource/frameworks.ai.platform.development/dispatches \
+          --header "Authorization: token ${{ secrets.AI_TOOL_WEBHOOK_TOKEN }}" \
+          --header 'Accept: application/vnd.github.everest-preview+json' \
+          --data '{"event_type": "imz_drop_succeeded", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
