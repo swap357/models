@@ -11,6 +11,7 @@ on:
         - atsm
         - tf_dataset
         - pytorch
+        - emr
       workload:
         required: true
         default: resnet50v1.5-inference
@@ -98,6 +99,7 @@ jobs:
         no_proxy: ${{ secrets.NO_PROXY }}
       volumes:
         - /tf_dataset/:/tf_dataset/
+        - /pytorch:/pytorch/
       options: --privileged
     steps:
     - name: Checkout
