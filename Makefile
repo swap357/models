@@ -53,6 +53,14 @@ unit_test:
 	@echo "Running unit tests..."
 	tox -e py3-py.test
 
+test_tl_tf_notebook: venv
+	@. $(ACTIVATE) && pip install -r docs/notebooks/transfer_learning/requirements.txt && \
+	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh tensorflow
+
+test_tl_pyt_notebook: venv
+	@. $(ACTIVATE) && pip install -r docs/notebooks/transfer_learning/requirements.txt && \
+	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh pytorch
+
 test: lint unit_test
 
 clean:
