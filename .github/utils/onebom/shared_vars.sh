@@ -1,0 +1,21 @@
+HOST_PATH="/host"
+COLLATED_REQUIREMENTS="requirements_collated"
+COLLATED_REQUIREMENTS_FILENAME="${COLLATED_REQUIREMENTS}.txt"
+FROZEN_COLLATED_REQUIREMENTS_FILENAME="${COLLATED_REQUIREMENTS}.frozen.txt"
+REQUIREMENTS_FILENAME="requirements.txt"
+REQUIREMENTS_STRLEN=17
+REF_MODELS_ROOT="${REF_MODELS_ROOT:=../../../}"
+REF_MODELS_ROOT_STRLEN=9
+
+DEBUG=1
+
+function debug () {
+  if [[ "${DEBUG}" == "1" ]]
+  then
+    echo $1
+  fi
+}
+
+function error () {
+  echo $1
+}
