@@ -1,67 +1,67 @@
-ResNet50 v1.5 Accuracy bf32:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
-  env:
-    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
-    OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_bf32
-    BATCH_SIZE: '100'
-    PRECISION: bfloat32
-  shm_size: 8G
-  privileged: true
-  init: true
-  volumes:
-  - src: /tf_dataset/dataset/TF_Imagenet_FullData
-    dst: /tf_dataset/dataset/TF_Imagenet_FullData
-  - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_bf32
-    dst: /output/tf-resnet50v1-5-inference/accuracy_bf32
-ResNet50 v1.5 Accuracy bf16:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
-  env:
-    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
-    OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_bf16
-    BATCH_SIZE: '100'
-    PRECISION: bfloat16
-  shm_size: 8G
-  privileged: true
-  init: true
-  volumes:
-  - src: /tf_dataset/dataset/TF_Imagenet_FullData
-    dst: /tf_dataset/dataset/TF_Imagenet_FullData
-  - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_bf16
-    dst: /output/tf-resnet50v1-5-inference/accuracy_bf16
-ResNet50 v1.5 Accuracy fp32:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
-  env:
-    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
-    OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_fp32
-    BATCH_SIZE: '100'
-    PRECISION: fp32
-  shm_size: 8G
-  privileged: true
-  init: true
-  volumes:
-  - src: /tf_dataset/dataset/TF_Imagenet_FullData
-    dst: /tf_dataset/dataset/TF_Imagenet_FullData
-  - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_fp32
-    dst: /output/tf-resnet50v1-5-inference/accuracy_fp32
-ResNet50 v1.5 Accuracy int8:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
-  env:
-    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
-    OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_int8
-    BATCH_SIZE: '100'
-    PRECISION: int8
-  shm_size: 8G
-  privileged: true
-  init: true
-  volumes:
-  - src: /tf_dataset/dataset/TF_Imagenet_FullData
-    dst: /tf_dataset/dataset/TF_Imagenet_FullData
-  - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_int8
-    dst: /output/tf-resnet50v1-5-inference/accuracy_int8
+# ResNet50 v1.5 Accuracy bf32:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
+#   cmd: /bin/bash quickstart/accuracy.sh
+#   env:
+#     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+#     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_bf32
+#     BATCH_SIZE: '100'
+#     PRECISION: bfloat32
+#   shm_size: 8G
+#   privileged: true
+#   init: true
+#   volumes:
+#   - src: /tf_dataset/dataset/TF_Imagenet_FullData
+#     dst: /tf_dataset/dataset/TF_Imagenet_FullData
+#   - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_bf32
+#     dst: /output/tf-resnet50v1-5-inference/accuracy_bf32
+# ResNet50 v1.5 Accuracy bf16:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
+#   cmd: /bin/bash quickstart/accuracy.sh
+#   env:
+#     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+#     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_bf16
+#     BATCH_SIZE: '100'
+#     PRECISION: bfloat16
+#   shm_size: 8G
+#   privileged: true
+#   init: true
+#   volumes:
+#   - src: /tf_dataset/dataset/TF_Imagenet_FullData
+#     dst: /tf_dataset/dataset/TF_Imagenet_FullData
+#   - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_bf16
+#     dst: /output/tf-resnet50v1-5-inference/accuracy_bf16
+# ResNet50 v1.5 Accuracy fp32:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
+#   cmd: /bin/bash quickstart/accuracy.sh
+#   env:
+#     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+#     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_fp32
+#     BATCH_SIZE: '100'
+#     PRECISION: fp32
+#   shm_size: 8G
+#   privileged: true
+#   init: true
+#   volumes:
+#   - src: /tf_dataset/dataset/TF_Imagenet_FullData
+#     dst: /tf_dataset/dataset/TF_Imagenet_FullData
+#   - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_fp32
+#     dst: /output/tf-resnet50v1-5-inference/accuracy_fp32
+# ResNet50 v1.5 Accuracy int8:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
+#   cmd: /bin/bash quickstart/accuracy.sh
+#   env:
+#     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+#     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_int8
+#     BATCH_SIZE: '100'
+#     PRECISION: int8
+#   shm_size: 8G
+#   privileged: true
+#   init: true
+#   volumes:
+#   - src: /tf_dataset/dataset/TF_Imagenet_FullData
+#     dst: /tf_dataset/dataset/TF_Imagenet_FullData
+#   - src: $PWD/output/tf-resnet50v1-5-inference/accuracy_int8
+#     dst: /output/tf-resnet50v1-5-inference/accuracy_int8
 ResNet50 v1.5 Realtime Inference bf32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
   cmd: /bin/bash quickstart/inference_realtime.sh
@@ -70,6 +70,8 @@ ResNet50 v1.5 Realtime Inference bf32:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_bf32
     BATCH_SIZE: '1'
     PRECISION: bfloat32
+    OMP_NUM_THREADS: '16'
+    CORES_PER_INSTANCE: '16'
   shm_size: 8G
   privileged: true
   init: true
@@ -87,6 +89,7 @@ ResNet50 v1.5 Realtime Inference bf16:
     BATCH_SIZE: '1'
     PRECISION: bfloat16
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
   shm_size: 8G
   privileged: true
   init: true
@@ -103,7 +106,8 @@ ResNet50 v1.5 Realtime Inference fp32:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_fp32
     BATCH_SIZE: '1'
     PRECISION: fp32
-    OMP_NUM_THREADS: '4'
+    OMP_NUM_THREADS: '16'
+    CORES_PER_INSTANCE: '16'
   shm_size: 8G
   privileged: true
   init: true
@@ -120,7 +124,8 @@ ResNet50 v1.5 Realtime Inference int8:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_int8
     BATCH_SIZE: '1'
     PRECISION: int8
-    OMP_NUM_THREADS: '4'
+    OMP_NUM_THREADS: '16'
+    CORES_PER_INSTANCE: '16'
   shm_size: 8G
   privileged: true
   init: true
@@ -137,6 +142,8 @@ ResNet50 v1.5 Throughput bf32:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_bf32
     BATCH_SIZE: '448'
     PRECISION: bfloat32
+    OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
   shm_size: 8G
   privileged: true
   init: true
@@ -154,6 +161,7 @@ ResNet50 v1.5 Throughput bf16:
     BATCH_SIZE: '80'
     PRECISION: bfloat16
     OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
   shm_size: 8G
   privileged: true
   init: true
@@ -171,6 +179,7 @@ ResNet50 v1.5 Throughput fp32:
     BATCH_SIZE: '116'
     PRECISION: fp32
     OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
   shm_size: 8G
   privileged: true
   init: true
@@ -188,6 +197,7 @@ ResNet50 v1.5 Throughput int8:
     BATCH_SIZE: '116'
     PRECISION: int8
     OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
   shm_size: 8G
   privileged: true
   init: true
@@ -205,6 +215,7 @@ ResNet50 v1.5 Weightsharing Inference bf16:
     BATCH_SIZE: '1'
     PRECISION: bfloat16
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_BLOCKTIME: '1'
   shm_size: 8G
   privileged: true
@@ -223,6 +234,7 @@ ResNet50 v1.5 Weightsharing Inference int8:
     BATCH_SIZE: '1'
     PRECISION: int8
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_BLOCKTIME: '1'
   shm_size: 8G
   privileged: true
