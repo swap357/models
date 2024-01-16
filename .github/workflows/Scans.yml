@@ -7,7 +7,7 @@ jobs:
     uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Coverity.yml@one-ci-cd
     with:
       org: intel-innersource
-      repos: frameworks.ai.models.intel-models
+      repo: frameworks.ai.models.intel-models
       refs: ${{ github.head_ref }}
       projectType: python
       url: https://coverityent.devtools.intel.com/prod8
