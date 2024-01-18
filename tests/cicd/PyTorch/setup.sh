@@ -24,8 +24,8 @@ if [[ "${is_lkg_drop}" == "true" ]]; then
     python -m pip install -r requirements.txt
     python cdt.py --username=tf_qa_prod --password ${TF_QA_PROD} download --product ipytorch --release ${AIKIT_RELEASE} -c l_drop_installer --download-dir ${WORKSPACE}/pytorch_setup
     cd ${WORKSPACE}/pytorch_setup
-    chmod +x IPEX_installer-2024.0.0.*
-    ./IPEX_installer-2024.0.0.* -b -u -p ${WORKSPACE}/pytorch_setup
+    chmod +x IPEX_installer-2024.*
+    ./IPEX_installer-2024.* -b -u -p ${WORKSPACE}/pytorch_setup
   fi
 else
   pip install --upgrade pip
