@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..d33abb678 100644
+index fc9411e95..2579f42b8 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -147,7 +147,7 @@ index fc9411e95..d33abb678 100644
 +                    model(**torch_compile_inputs)
 +                    model(**torch_compile_inputs)
 +        else:
-+            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16):
++            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                if args.ipex:
 +                    print('[Info] Running torch.compile() with IPEX backend')
 +                    model = torch.compile(model, backend="ipex")
@@ -202,7 +202,7 @@ index fc9411e95..d33abb678 100644
 +                    print('P99 Latency {:.2f} ms'.format(p99*1000))
 +                    print("Throughput: {:.3f} sentence/s".format(throughput))     
 +                    break
-+                with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16):
++                with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                    inputs = {
 +                        "input_ids": batch[0],
 +                        "attention_mask": batch[1],
@@ -294,7 +294,7 @@ index fc9411e95..d33abb678 100644
                      )
 -            outputs = model(**inputs)
 +            if args.inductor:
-+                with torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16):
++                with torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                    outputs = model(**inputs)
 +            else:
 +                outputs = model(**inputs)
@@ -1026,7 +1026,7 @@ index 474b92f72..98aab97f0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..b8a90d9b8 100755
+index cf71499b0..b681d82de 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,9 @@ from .utils import (
@@ -1185,7 +1185,7 @@ index cf71499b0..b8a90d9b8 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1415,6 +1466,59 @@ class Trainer:
+@@ -1415,6 +1466,69 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1231,6 +1231,16 @@ index cf71499b0..b8a90d9b8 100755
 +                        model = torch.compile(model)
 +                    y = model(**example_batch)
 +                    y = model(**example_batch)
++            elif self.args.fp16_cpu:
++                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.half):
++                    if self.args.use_ipex:
++                        print('[Info] Running torch.compile() float16 with IPEX backend')
++                        model = torch.compile(model, backend="ipex")
++                    else:
++                        print('[Info] Running torch.compile() float16 with default backend')
++                        model = torch.compile(model)
++                    y = model(**example_batch)
++                    y = model(**example_batch)
 +            else:
 +                with torch.no_grad():
 +                    if self.args.use_ipex:
@@ -1245,19 +1255,19 @@ index cf71499b0..b8a90d9b8 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1575,8 +1679,9 @@ class Trainer:
+@@ -1575,8 +1689,9 @@ class Trainer:
  
          # torch.compile() needs to be called after wrapping the model with FSDP or DDP
          # to ensure that it accounts for the graph breaks required by those wrappers
 -        if self.args.torch_compile:
 -            model = torch.compile(model, backend=self.args.torch_compile_backend, mode=self.args.torch_compile_mode)
 +        if self.args.inductor:
-+            with torch.cpu.amp.autocast(enabled=self.args.bf16):
++            with torch.cpu.amp.autocast(enabled=self.args.bf16 or self.args.fp16_cpu, dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                model = torch.compile(model, backend=self.args.torch_compile_backend, mode=self.args.torch_compile_mode)
  
          return model
  
-@@ -1993,7 +2098,11 @@ class Trainer:
+@@ -1993,7 +2108,11 @@ class Trainer:
                          scale_after = self.scaler.get_scale()
                          optimizer_was_run = scale_before <= scale_after
                      else:
@@ -1270,7 +1280,7 @@ index cf71499b0..b8a90d9b8 100755
  
                      if optimizer_was_run and not self.deepspeed:
                          self.lr_scheduler.step()
-@@ -2714,7 +2823,10 @@ class Trainer:
+@@ -2714,7 +2833,10 @@ class Trainer:
              # loss gets scaled under gradient_accumulation_steps in deepspeed
              loss = self.deepspeed.backward(loss)
          else:
@@ -1282,7 +1292,7 @@ index cf71499b0..b8a90d9b8 100755
  
          return loss.detach()
  
-@@ -3085,6 +3197,54 @@ class Trainer:
+@@ -3085,6 +3207,54 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics(output.metrics)
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
@@ -1320,8 +1330,8 @@ index cf71499b0..b8a90d9b8 100755
 +                        print("#############################")
 +                        break
 +                    with torch.no_grad():
-+                        if (self.args.bf16 or self.args.int8_bf16) and self.args.inductor:
-+                            with torch.cpu.amp.autocast(dtype=torch.bfloat16):
++                        if (self.args.bf16 or self.args.int8_bf16 or self.args.fp16_cpu) and self.args.inductor:
++                            with torch.cpu.amp.autocast(dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                                start = time.time()
 +                                outputs = model(**batch)
 +                                #prof.step()
@@ -1337,7 +1347,7 @@ index cf71499b0..b8a90d9b8 100755
  
      def evaluation_loop(
          self,
-@@ -3133,7 +3293,12 @@ class Trainer:
+@@ -3133,7 +3303,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1351,7 +1361,7 @@ index cf71499b0..b8a90d9b8 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3158,6 +3323,20 @@ class Trainer:
+@@ -3158,6 +3333,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.

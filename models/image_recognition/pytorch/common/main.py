@@ -525,6 +525,15 @@ def main_worker(gpu, ngpus_per_node, args):
                     else:
                         print('[Info] Running torch.compile() BFloat16 with default backend')
                         model = torch.compile(model)
+            elif args.fp16:
+                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.half):
+                    x = x.to(torch.half)
+                    if args.ipex:
+                        print('[Info] Running torch.compile() FPloat16 with IPEX backend')
+                        model = torch.compile(model, backend="ipex")
+                    else:
+                        print('[Info] Running torch.compile() FPloat16 with default backend')
+                        model = torch.compile(model)
             else:
                 with torch.no_grad():
                     if args.ipex:
@@ -533,7 +542,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     else:
                         print('[Info] Running torch.compile() Float32 with default backend')
                         model = torch.compile(model)
-            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16):
+            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
                 y = model(x)
                 y = model(x)
         validate(val_loader, model, criterion, args)
@@ -558,7 +567,7 @@ def main_worker(gpu, ngpus_per_node, args):
             model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, fuse_update_step=False)
         
         if args.inductor:
-            with torch.cpu.amp.autocast(enabled=args.bf16):
+            with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
                 if args.ipex:
                     print('[Info] Running training steps torch.compile() with IPEX backend')
                     model = torch.compile(model, backend="ipex")
@@ -599,7 +608,7 @@ def train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, a
 
     if args.bf16:
         print("running bfloat16 training step\n")
-    elif args.ipex and args.fp16:
+    elif args.fp16:
         print("running float16 training step\n")
     else:
         print("running fp32 training step\n")
@@ -619,7 +628,7 @@ def train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, a
                 images = images.contiguous(memory_format=torch.channels_last)
             if args.bf16:
                 images = images.to(torch.bfloat16)
-            if args.ipex and args.fp16:
+            if args.fp16:
                 images = images.to(torch.half)
 
             if (epoch - args.start_epoch) * len(train_loader) + i == args.warmup_iterations:
@@ -636,7 +645,7 @@ def train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, a
                 with torch.cpu.amp.autocast(dtype=torch.bfloat16):
                     output = model(images)
                 output = output.to(torch.float32)
-            elif args.ipex and args.fp16:
+            elif args.fp16:
                 with torch.cpu.amp.autocast(dtype=torch.half):
                     output = model(images)
                 output = output.to(torch.float32)
@@ -647,7 +656,7 @@ def train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, a
             # compute gradient and do SGD step
             if not args.distributed:
                 optimizer.zero_grad(set_to_none=True)
-            if args.ipex and args.fp16:
+            if args.fp16:
                 scaler.scale(loss).backward()
                 # TODO check it works for fp16 dtype
                 if lr_scheduler:
@@ -705,7 +714,7 @@ def run_weights_sharing_model(m, tid, args):
     x = torch.randn(args.batch_size, 3, 224, 224)
     if args.bf16:
         x = x.to(torch.bfloat16)
-    if args.ipex and args.fp16:
+    if args.fp16:
         x = x.to(torch.half)
     x = x.contiguous(memory_format=torch.channels_last)
 
@@ -715,7 +724,7 @@ def run_weights_sharing_model(m, tid, args):
             if not args.jit and args.bf16:
                 with torch.cpu.amp.autocast(dtype=torch.bfloat16):
                     y = m(x)
-            elif not args.jit and args.ipex and args.fp16:
+            elif not args.jit and args.fp16:
                 with torch.cpu.amp.autocast(dtype=torch.half):
                     y = m(x)
             else:
@@ -793,7 +802,7 @@ def validate(val_loader, model, criterion, args):
                     target = (torch.rand(args.batch_size) * num_classes).long()
                     if args.bf16:
                         images = images.to(torch.bfloat16)
-                    if args.ipex and args.fp16:
+                    if args.fp16:
                         images = images.to(torch.half)
                     for i in range(number_iter):
                         if i >= args.warmup_iterations:
@@ -801,7 +810,7 @@ def validate(val_loader, model, criterion, args):
                         if not args.jit and args.bf16:
                             with torch.cpu.amp.autocast(dtype=torch.bfloat16):
                                 output = model(images)
-                        elif not args.jit and args.ipex and args.fp16:
+                        elif not args.jit and args.fp16:
                             with torch.cpu.amp.autocast(dtype=torch.half):
                                 output = model(images)
                         else:
@@ -810,7 +819,7 @@ def validate(val_loader, model, criterion, args):
                         if i >= args.warmup_iterations:
                             batch_time.update(time.time() - end)
 
-                        if args.bf16 or (args.ipex and args.fp16):
+                        if args.bf16 or args.fp16:
                             output = output.to(torch.float32)
 
                         loss = criterion(output, target)
@@ -830,7 +839,7 @@ def validate(val_loader, model, criterion, args):
                         images = images.contiguous(memory_format=torch.channels_last)
                     if args.bf16:
                         images = images.to(torch.bfloat16)
-                    if args.ipex and args.fp16:
+                    if args.fp16:
                         images = images.to(torch.half)
                     if args.gpu is not None:
                         images = images.cuda(args.gpu, non_blocking=True)
@@ -840,7 +849,7 @@ def validate(val_loader, model, criterion, args):
                     if not args.jit and args.bf16:
                         with torch.cpu.amp.autocast(dtype=torch.bfloat16):
                             output = model(images)
-                    elif not args.jit and args.ipex and args.fp16:
+                    elif not args.jit and args.fp16:
                         with torch.cpu.amp.autocast(dtype=torch.half):
                             output = model(images)
 
@@ -850,7 +859,7 @@ def validate(val_loader, model, criterion, args):
                     # compute output
                     batch_time.update(time.time() - end)
                     #print(output)
-                    if args.bf16 or (args.ipex and args.fp16):
+                    if args.bf16 or args.fp16:
                         output = output.to(torch.float32)
                     loss = criterion(output, target)
                     # measure accuracy and record loss
