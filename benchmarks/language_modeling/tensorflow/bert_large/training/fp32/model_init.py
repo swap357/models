@@ -207,7 +207,7 @@ class ModelInitializer(BaseModelInitializer):
             self.benchmark_command = self.benchmark_command + self.python_exe + " " + benchmark_script + "\n"
         elif not self.args.gpu:
             numa_cmd = " -np 1 numactl -N {} -m {} "
-            if int(os.environ["MPI_NUM_PROCESSES"]) > 1:
+            if int(os.environ["MPI_NUM_PROCESSES"]) > 1 and int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"]) > 1:
                 self.benchmark_command = "mpirun " + self.benchmark_command + numa_cmd.format(0, 0) \
                     + os.environ["PYTHON_EXE"] + " " + benchmark_script
             else:
