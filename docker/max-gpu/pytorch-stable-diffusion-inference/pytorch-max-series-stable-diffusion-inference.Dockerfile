@@ -26,7 +26,7 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 USER root
 
-WORKDIR /workspace/pytorch-flex-series-stable-diffusion-inference/models
+WORKDIR /workspace/pytorch-max-series-stable-diffusion-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PY_VERSION=3.10

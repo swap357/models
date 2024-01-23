@@ -7,15 +7,18 @@ This document has instructions for running Stable Diffusion inference using Inte
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
-| Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed:[Download Driver 647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
-| Software | Docker* Installed |
+| Host machine  | [Intel® Data Center GPU Flex Series](https://ark.intel.com/content/www/us/en/ark/products/series/230021/intel-data-center-gpu-flex-series.html) 170  |
+| Drivers | GPU-compatible drivers need to be installed: Download [Driver](https://dgpu-docs.intel.com/driver/installation.html) |
+| Software | Docker* |
 
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| `online_inference.sh` | Inference for specified precision(FP32 or FP16) with batch size 1 on Flex series 170 |
+| `run_model.sh` | Inference with batch size 1 on Flex series 170 |
+
+> [!NOTE]
+> At the moment sample supports FP16 precision only (`export PRECISION=fp16`).
 
 ## Run Using Docker
 
@@ -26,14 +29,20 @@ docker pull intel/generative-ai:pytorch-flex-gpu-stable-diffusion-inference
 ```
 
 ### Run Docker Image
-The stable diffusion inference container includes scripts,model and libraries need to run FP32 and FP16 inference. To run the `online_inference.sh` quickstart script using this container, you will need to provide an output directory where log files will be written. 
+The stable diffusion inference container includes scripts, model and libraries needed to run FP16 inference. To run the `run_model.sh` quickstart script using this container, you will need to provide an output directory where log files will be written.
 
 ```bash
-export IMAGE_NAME=intel/generative-ai:pytorch-flex-gpu-stable-diffusion-inference
-export PRECISION=<provide either fp32 or fp16>
-export OUTPUT_DIR=<path to output directory>
-export SCRIPT=quickstart/online_inference.sh
+#Optional
+export PRECISION=fp16
+export BATCH_SIZE=<batch size otherwise (default: 1)>
 
+#Required
+export OUTPUT_DIR=<path to output directory>
+export SCRIPT=run_model.sh
+export MULTI_TILE=False
+export PLATFORM=Flex
+
+IMAGE_NAME=intel/generative-ai:pytorch-flex-gpu-stable-diffusion-inference
 DOCKER_ARGS="--rm -it"
 
 docker run \
@@ -42,6 +51,8 @@ docker run \
   --ipc=host \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env MULTI_TILE=${MULTI_TILE} \
+  --env PLATFORM=${PLATFORM} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \

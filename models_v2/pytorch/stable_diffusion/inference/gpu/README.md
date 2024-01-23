@@ -9,7 +9,10 @@ Stable Diffusion Inference best known configurations with Intel® Extension for 
 |  Inference   |    Pytorch    |       -        |           -           |         -          |
 
 # Pre-Requisite
-* Host has Intel® Data Center GPU Max or Flex or Arc
+* Host has one of the following GPUs:
+  * **Arc Series** - [Intel® Arc™ A-Series Graphics](https://ark.intel.com/content/www/us/en/ark/products/series/227957/intel-arc-a-series-graphics.html)
+  * **Flex Series** - [Intel® Data Center GPU Flex Series](https://ark.intel.com/content/www/us/en/ark/products/series/230021/intel-data-center-gpu-flex-series.html)
+  * **Max Series** - [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
 * Host has installed latest Intel® Data Center GPU Max & Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 
 # Prepare Dataset
@@ -31,6 +34,8 @@ the scripts will download the dataset automatically. it using nateraw/parti-prom
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 6. Run `run_model.sh`
 
+> [!NOTE]
+> Refer to [CONTAINER_FLEX.md](CONTAINER_FLEX.md) and [CONTAINER_MAX.md](CONTAINER_MAX.md) for Stable Diffusion Inference instructions using docker containers.
 ## Output
 
 Single-tile output will typicall looks like:

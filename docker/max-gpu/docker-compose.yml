@@ -26,9 +26,10 @@ services:
       args:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
-        no_proxy: ${no_proxy}
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: xpu-max
+        no_proxy: ""
+        NO_PROXY: ""
+        PYT_BASE_IMAGE: ${PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu}
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-inference/pytorch-max-series-resnet50v1-5-inference.Dockerfile
     command: >
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
@@ -91,3 +92,21 @@ services:
       dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+  pytorch-stable-diffusion-inference:
+    build:
+      dockerfile: docker/max-gpu/pytorch-stable-diffusion-inference/pytorch-max-series-stable-diffusion-inference.Dockerfile
+    extends: pytorch-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-stable-diffusion-inference
+  pytorch-gpt-j-6b-mlperf-inference:
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ''
+        NO_PROXY: ''
+        BASE_IMAGE: intel/oneapi-basekit
+        BASE_TAG: ${BASE_TAG:-2023.1.0-devel-ubuntu22.04}
+        PYTHON: python3.9
+      dockerfile: docker/max-gpu/pytorch-gpt-j-6b-mlperf-inference/pytorch-max-series-gpt-j-6b-mlperf-inference.Dockerfile
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
