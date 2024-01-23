@@ -4,4 +4,4 @@ diffusers
 transformers
 accelerate
 pytorch-fid
-scipy==1.9.1
+scipy==1.11.1
