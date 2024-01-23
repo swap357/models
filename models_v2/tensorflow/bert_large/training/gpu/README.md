@@ -12,6 +12,11 @@ Bert-Large Model Training using Intel® Extension for TensorFlow.
 
 * Host has Intel® Data Center GPU Max.
 * Host has installed latest Intel® Data Center GPU Max Series Driver https://dgpu-docs.intel.com/driver/installation.html
+* The following Intel® oneAPI Base Toolkit components are required:
+  - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
+  - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
+
+  Recommend to use a package manager like apt, yum or dnf to install the packages above. Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Prepare Dataset
 
