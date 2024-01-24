@@ -6,14 +6,14 @@ Best known method of Unet-3D training for Intel® Extention for TensorFlow.
 | :---: | :---: | :---: | :---: | :---: |
 | Training | TensorFlow | [DeepLearningExamples/UNet_3D](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/Segmentation/UNet_3D_Medical) | master | 3dunet_itex.patch <br /> 3dunet_itex_with_horovod.patch |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for UNet-3D training instructions using docker containers.
 # Pre-Requisite
-* Host has Intel® Data Center GPU Max
+* Host has Intel® Data Center GPU Max Series
 * Host has installed latest Intel® Data Center GPU Max Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 
 # Dataset 
-```
 The 3D-UNet model was trained in the [Brain Tumor Segmentation 2019 dataset](https://www.med.upenn.edu/cbica/brats2019/data.html). Test images provided by the organization were used to produce the resulting masks for submission. Upon registration, the challenge's data is made available through the https//ipp.cbica.upenn.edu service.
-```
+
 
 ## Run Model
 1. `git clone https://github.com/IntelAI/models.git`

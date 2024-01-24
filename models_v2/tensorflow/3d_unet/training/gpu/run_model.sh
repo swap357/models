@@ -53,7 +53,7 @@ elif [ ${PRECISION} == "fp32" ];then
   echo "Datatype is fp32"
   AMP=""
 else
-  echo "Error: "${DATATYPE}" not supported yet!"
+  echo "Error: "${PRECISION}" not supported yet!"
   exit 1
 fi
 
@@ -91,7 +91,6 @@ EOF
 )
 
 # Write the content to a YAML file
-script_path="$(realpath "$0")"
-script_directory=$(dirname "$script_path")
-echo "$yaml_content" >  ${script_directory}/results.yaml
-echo "YAML file created, path:$script_directory/results.yaml"
+
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
+echo "YAML file created, path:${OUTPUT_DIR}/results.yaml"
