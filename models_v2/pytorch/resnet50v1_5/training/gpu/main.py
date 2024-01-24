@@ -906,7 +906,6 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
         print("====Before compile model====")
         compiled_model = torch.compile(model, backend="inductor", options={"freezing": True})
         return compiled_model
-
     def run_validate(loader, model, autocast_dtype, base_progress=0):
 
         # record time

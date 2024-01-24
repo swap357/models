@@ -36,13 +36,13 @@ done
 
 OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
-if [[ "${PLATFORM}" == "PVC" ]]; then
+if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-1024}
     PRECISION=${PRECISION:-INT8}
     NUM_ITERATIONS=${NUM_ITERATIONS:-500}
-elif [[ "${PLATFORM}" == "ATS-M" ]]; then
+elif [[ "${PLATFORM}" == "Flex" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
-	echo "ATS-M not support multitile"
+	echo "Flex not support multitile"
 	exit 1
     fi
     BATCH_SIZE=${BATCH_SIZE:-1024}
@@ -74,7 +74,6 @@ fi
 if [[ "${MULTI_TILE}" == "True" ]]; then
     export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
 fi
-
 
 echo 'Running with parameters:'
 echo " PLATFORM: ${PLATFORM}"
@@ -133,7 +132,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
         --num-iterations ${NUM_ITERATIONS} \
         --benchmark 1 \
         ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -163,8 +162,8 @@ else
         --benchmark 1 \
         ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log
     wait
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
     sum_log_analysis ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
@@ -188,5 +187,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."

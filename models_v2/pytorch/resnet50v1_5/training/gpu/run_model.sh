@@ -37,7 +37,7 @@ done
 
 OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
-if [[ "${PLATFORM}" == "PVC" ]]; then
+if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-256}
     PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
@@ -80,11 +80,8 @@ echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
 echo " MULTI_TILE: ${MULTI_TILE}"
 
-
-
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
-
 
 modelname=resnet50
 
@@ -97,7 +94,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
         ${DATASET_DIR} \
         --num-iterations ${NUM_ITERATIONS} \
         $flag 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -106,7 +103,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
     mpiexec -np 2 -ppn 2 --prepend-rank python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
-    python ../../../../../models/common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
     latency=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep Latency | awk -F ' ' '{print $2}')
@@ -129,6 +126,6 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
 

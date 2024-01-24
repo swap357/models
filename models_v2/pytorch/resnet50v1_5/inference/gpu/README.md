@@ -1,6 +1,6 @@
-# Resnet50 Inference
+# ResNet50v1.5 Inference
 
-Resnet50 Inference BKC.
+ResNet50v1.5 Inference best known configurations with Intel® Extension for PyTorch.
 
 ## Model Information
 
@@ -9,29 +9,56 @@ Resnet50 Inference BKC.
 |  Inference   |    Pytorch    |       -        |           -           |         -          |
 
 # Pre-Requisite
-* Host has Intel® Data Center GPU MAX or FLEX or ARC
+* Host has one of the following GPUs:
+  * **Arc Series** - [Intel® Arc™ A-Series Graphics](https://ark.intel.com/content/www/us/en/ark/products/series/227957/intel-arc-a-series-graphics.html)
+  * **Flex Series** - [Intel® Data Center GPU Flex Series](https://ark.intel.com/content/www/us/en/ark/products/series/230021/intel-data-center-gpu-flex-series.html)
+  * **Max Series** - [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
 * Host has installed latest Intel® Data Center GPU Max & Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
-* Host has installed [Intel® Extension for PyTorch](https://intel.github.io/intel-extension-for-pytorch/xpu/latest/)
+* The following Intel® oneAPI Base Toolkit components are required:
+  - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
+  - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
+  - Intel® oneAPI MPI Library
+  - Intel® oneAPI TBB Library
+
+  Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Prepare Dataset
 ## Dataset: imagenet
 Default is dummy dataset.
 ImageNet is recommended, the download link is https://image-net.org/challenges/LSVRC/2012/2012-downloads.php.
 
-
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
-2. `cd models_v2/pytorch/resnet50v1_5/inference/gpu`
-3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-4. Activate virtual env: `. ./venv/bin/activate`
-5. Setup required environment paramaters
+2. `cd models/models_v2/pytorch/resnet50v1_5/inference/gpu`
+3. Create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install the latest GPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation):
+  ```
+  python -m pip install torch torchvision intel-extension-for-pytorch --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
+  ```
+6. Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
+    ```bash
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
+    source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
+7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=PVC` (PVC or ATS-M or ARC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=PVC` (Max or Flex or ARC)                                                 |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1024`                                |
-| **PRECISION** (optional)     |`export PRECISION=INT8` (INT8,FP32, Fp16 for all platform, BF16 and TF32 only for PVC  |
+| **PRECISION** (optional)     |`export PRECISION=INT8` (INT8,FP32, FP16 for all platform, BF16 and TF32 only for Max)  |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=500`                             |
 | **DATASET_DIR** (optional)   |                               `export DATASET_DIR=--dummy`                           |
