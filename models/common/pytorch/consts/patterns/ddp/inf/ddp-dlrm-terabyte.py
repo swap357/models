@@ -16,22 +16,22 @@
 """Consts for ddp-dlrm-terabyte inference."""
 
 ACC = {
-    "type": "mean",
-    "pattern": r", accuracy (\d+.\d+)",
-    "unit": "loss",
+    "type": "total",
+    "pattern": r"AUROC over test set: (\d+.\d+)",
+    "unit": "AUROC",
     "number_of_partials": 2,
 }
 
 
 PERF = {
-    "type": "total",
-    "pattern": r"\[[0-9]\] dlrm_inf throughput: .* (\d+.\d+) .* samples/s",
-    "inverse": False,
+    "type": "max",
+    "pattern": r"avg eval time per iter at ITER: 45, (\d+.\d+) s",
+    "inverse": True,
     "multiply": False,
-    "use_batch_size": False,
+    "use_batch_size": True,
     "unit": "samples/s",
 }
 
 FUNCTIONAL = {
-    "pattern": r"dlrm_inf throughput: * (\d+.\d+)  samples/s",
+    "pattern": r"AUROC over test set: (\d+.\d+)",
 }

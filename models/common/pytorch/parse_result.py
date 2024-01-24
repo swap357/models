@@ -85,6 +85,18 @@ def parse_log_min_for_hvd_ddp(log_path: str, pattern_dict: dict) -> Optional[flo
         return float(min(min_value))
     return None
 
+def parse_log_max_for_hvd_ddp(log_path: str, pattern_dict: dict) -> Optional[float]:
+    """Parse log and return matched value as total."""
+    max_value = []
+    with open(log_path, "r", encoding="UTF-8") as file:
+        for line in file:
+            match = re.search(pattern_dict["pattern"], line)
+            if match:
+                max_value.append(float(match.group(1)))
+    if max_value:
+        return float(max(max_value))
+    return None
+
 def parse_log_mean(log_path: str, pattern_dict: dict) -> Optional[float]:
     """Parse log and return mean of matched values."""
     partials = []
@@ -138,6 +150,8 @@ def parse_log(test_type: str,
                 performance = parse_log_total_for_hvd_ddp(log_dir, perf_pattern)
             elif perf_pattern["type"] == "mean":
                 performance = parse_log_mean(log_dir, perf_pattern)
+            elif perf_pattern["type"] == "max":
+                performance = parse_log_max_for_hvd_ddp(log_dir, perf_pattern)
         else:
             if perf_pattern["type"] == "total":
                 performance = parse_log_total(log_dir, perf_pattern)
