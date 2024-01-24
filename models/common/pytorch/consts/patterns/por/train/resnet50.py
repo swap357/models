@@ -1,4 +1,5 @@
-# Copyright (c) 2022 Intel Corporation
+#
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,3 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+"""Consts for resnet50 training."""
+
+ACC = {
+    "type": "total",
+    "pattern": r"Loss (\d+.\d+)",
+    "unit": "loss",
+}
+
+PERF = {
+    "type": "total",
+    "pattern": r"throughput:(\d+.\d+) image/sec",
+    "inverse": False,
+    "multiply": False,
+    "use_batch_size": False,
+    "unit": "image/s",
+}
+
+FUNCTIONAL = {
+    "pattern": r"Training performance: batch size:\d+, throughput:\d+.\d+ image/sec",
+}

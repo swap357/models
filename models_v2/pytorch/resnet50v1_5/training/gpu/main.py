@@ -614,7 +614,7 @@ def main_worker(ngpus_per_node, args):
     # [watch out] The pin memory is default enabled on CUDA for now in torch.
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
-        num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler)
+        num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler, drop_last=True)
 
     val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
@@ -774,20 +774,54 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
     duration_total = 0.0
     warmup_iter = 5
 
-    data_start = time.time()
-    for i, (images, target) in enumerate(train_loader):
-        global_num_iter +=1
-        # measure data loading time
-        data_time.update(time.time() - data_start)
-
-        if args.channels_last:
-            print('input to channels last')
-            images = images.to(memory_format=torch.channels_last)
-
-
+    # config profiler
+    import contextlib
+    def profiler_setup(profiling=False, *args, **kwargs):
+        if profiling:
+            return torch.profiler.profile(*args, **kwargs)
+        else:
+            return contextlib.nullcontext()
+    activities = [torch.profiler.ProfilerActivity.CPU]
+    if args.xpu is not None:
+        activities.append(torch.profiler.ProfilerActivity.XPU)
+    elif args.gpu is not None:
+        activities.append(torch.profiler.ProfilerActivity.CUDA)
+    # fixed wait iters = 1, active iters = 1, warmup_iters = 3, at_least 5 iters
+    # more iters will be skipped, and repeat will be fixed to 1
+    num_iters = args.num_iterations if args.num_iterations else len(train_loader)
+    skip_iters = max(num_iters - 5, 0)
+    schedule = torch.profiler.schedule(skip_first=skip_iters,
+                                       wait=1, warmup=3, active=1)
+    def trace_handle(prof):
+        profile_name = 'fp32'
+        if args.fp16:
+            profile_name = 'fp16'
+        elif args.bf16:
+            profile_name = 'bf16'
+        if args.distributed:
+            profile_name += '.xpu.' + str(args.rank)
         if args.xpu is not None:
-            # TODO: later the knieto will be used
-            with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
+            torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.' + profile_name + '.train.pt')
+        elif args.gpu is not None:
+            torch.save(prof.key_averages().table(sort_by="self_cuda_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
+        else:
+            torch.save(prof.key_averages().table(sort_by="self_cpu_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
+
+
+    # start profiler, or none while profiling is false
+    with profiler_setup(profiling, activities=activities, schedule=schedule, on_trace_ready=trace_handle) as prof:
+        data_start = time.time()
+        for i, (images, target) in enumerate(train_loader):
+            global_num_iter +=1
+            # measure data loading time
+            data_time.update(time.time() - data_start)
+
+            if args.channels_last:
+                print('input to channels last')
+                images = images.to(memory_format=torch.channels_last)
+
+
+            if args.xpu is not None:
                 try:
                     import memory_check
                     memory_check.display_mem("xpu:0")
@@ -803,28 +837,11 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 output = output.cpu()
                 target = target.cpu()
 
-            if profiling:
-                profile_name = 'fp32'
-                if args.fp16:
-                    profile_name = 'fp16'
-                elif args.bf16:
-                    profile_name = 'bf16'
-                if args.distributed:
-                    profile_name += '.xpu.' + str(args.rank)
-                torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.' + profile_name + '.train.pt')
-                torch.save(prof.table(sort_by="id", row_limit=100000), './profiling.' + profile_name + '.train.detailed.pt')
-        else:
-            start_time = time.time()
-            activities = None
-            prof_sort = None
-            if profiling:
-                prof_sort = "self_cpu_time_total"
-                activities=[torch.profiler.ProfilerActivity.CPU]
-                if args.gpu is not None:
-                    activities.append(torch.profiler.ProfilerActivity.CUDA)
-                    prof_sort = "self_cuda_time_total"
+            else:
+                start_time = time.time()
+                activities = None
+                prof_sort = None
 
-            with torch.profiler.profile(activities=activities, record_shapes=False) as prof:
                 if args.gpu is not None:
                     images = images.cuda(args.gpu, non_blocking=True)
                     target = target.cuda(args.gpu, non_blocking=True)
@@ -845,35 +862,35 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                     target = target.cpu()
 
             if profiling:
-                torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.card.' + str(args.xpu) + '.pt')
+                prof.step()
 
-        # measure elapsed time
-        duration_train = time.time() - start_time
-        batch_time.update(duration_train)
+            # measure elapsed time
+            duration_train = time.time() - start_time
+            batch_time.update(duration_train)
 
-        # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))
+            # measure accuracy and record loss
+            acc1, acc5 = accuracy(output, target, topk=(1, 5))
+            losses.update(loss.item(), images.size(0))
+            top1.update(acc1[0], images.size(0))
+            top5.update(acc5[0], images.size(0))
 
-        if i % args.print_freq == 0:
-            progress.display(i + 1)
+            if i % args.print_freq == 0:
+                progress.display(i + 1)
 
-        # exclude first iteration for calculating througput
-        if i >= warmup_iter:
-            duration_total += duration_train
-        data_start = time.time()
+            # exclude first iteration for calculating througput
+            if i >= warmup_iter:
+                duration_total += duration_train
+            data_start = time.time()
 
-        if i == (args.num_iterations - 1) and args.num_iterations >= warmup_iter:
-            print('Training performance: batch size:%d, throughput:%.2f image/sec'
-                  % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - warmup_iter)))))
-            sys.exit(0)
-        elif args.num_iterations == 0 and i == len(train_loader) - 1:
-            print('Training performance: batch size:%d, throughput:%.2f image/sec'
-                  % (args.batch_size, (args.batch_size / (duration_total / (len(train_loader) - warmup_iter)))))
-            if args.converge is None:
+            if i == (args.num_iterations - 1) and args.num_iterations >= warmup_iter:
+                print('Training performance: batch size:%d, throughput:%.2f image/sec'
+                      % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - warmup_iter)))))
                 sys.exit(0)
+            elif args.num_iterations == 0 and i == len(train_loader) - 1:
+                print('Training performance: batch size:%d, throughput:%.2f image/sec'
+                      % (args.batch_size, (args.batch_size / (duration_total / (len(train_loader) - warmup_iter)))))
+                if args.converge is None:
+                    sys.exit(0)
 
     if args.converge and not args.skip_tensorboard and mode == 'training':
         global tensorboard_data
@@ -889,14 +906,51 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
         print("====Before compile model====")
         compiled_model = torch.compile(model, backend="inductor", options={"freezing": True})
         return compiled_model
-    
+
     def run_validate(loader, model, autocast_dtype, base_progress=0):
 
         # record time
         duration_total = 0.0
         warmup_iter = 5
 
-        with torch.no_grad():
+        # config profiler
+        import contextlib
+        def profiler_setup(profiling=False, *args, **kwargs):
+            if profiling:
+                return torch.profiler.profile(*args, **kwargs)
+            else:
+                return contextlib.nullcontext()
+        activities = [torch.profiler.ProfilerActivity.CPU]
+        if args.xpu is not None:
+            activities.append(torch.profiler.ProfilerActivity.XPU)
+        elif args.gpu is not None:
+            activities.append(torch.profiler.ProfilerActivity.CUDA)
+        # fixed wait iters = 1, active iters = 1, warmup_iters = 3, at_least 5 iters
+        # more iters will be skipped, and repeat will be fixed to 1
+        num_iters = args.num_iterations if args.num_iterations else len(loader)
+        skip_iters = max(num_iters - 5, 0)
+        schedule = torch.profiler.schedule(skip_first=skip_iters,
+                                           wait=1, warmup=3, active=1)
+        def trace_handle(prof):
+            profile_name = 'fp32'
+            if args.fp16:
+                profile_name = 'fp16'
+            elif args.bf16:
+                profile_name = 'bf16'
+            if args.distributed:
+                profile_name += '.xpu.' + str(args.rank)
+            if args.xpu is not None:
+                print(prof.key_averages().table(sort_by="self_xpu_time_total"))
+                torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.' + profile_name + '.inf.pt')
+            elif args.gpu is not None:
+                print(prof.key_averages().table(sort_by="self_cuda_time_total"))
+                torch.save(prof.key_averages().table(sort_by="self_cuda_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
+            else:
+                print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+                torch.save(prof.key_averages().table(sort_by="self_cpu_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
+
+        # start profiler, or none while profiling is false
+        with profiler_setup(profiling, activities=activities, schedule=schedule, on_trace_ready=trace_handle) as prof, torch.no_grad():
             for i, (images, target) in enumerate(loader):
                 i = base_progress + i
 
@@ -906,62 +960,45 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
 
 
                 if args.xpu:
-                    with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
-                        try:
-                            import memory_check
-                            memory_check.display_mem("xpu:0")
-                        except:
-                            pass
-                        start_time = time.time()
-                        images = images.to(args.xpu, non_blocking=True)
+                    try:
+                        import memory_check
+                        memory_check.display_mem("xpu:0")
+                    except:
+                        pass
+                    start_time = time.time()
+                    images = images.to(args.xpu, non_blocking=True)
 
-                        if args.jit_trace:
+                    if args.jit_trace:
+                        # compute output
+                        output = model(images)
+                    elif args.dynamo:
+                        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                            output = model(images)
+                    else:
+                        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
                             # compute output
                             output = model(images)
-                        elif args.dynamo:
-                            with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
-                                output = model(images)
-                        else:
-                            with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
-                                # compute output
-                                output = model(images)
 
-                        # sync for time measurement
-                        if not args.converge:
-                            torch.xpu.synchronize(args.xpu)
+                    # sync for time measurement
+                    if not args.converge:
+                        torch.xpu.synchronize(args.xpu)
 
-                    if profiling:
-                        profile_name = 'fp32'
-                        if args.fp16:
-                            profile_name = 'fp16'
-                        elif args.bf16:
-                            profile_name = 'bf16'
-                        torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.' + profile_name + '.inf.pt')
-                        torch.save(prof.table(sort_by="id", row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
                 else:
                     start_time = time.time()
                     activities = None
                     prof_sort = None
-                    if profiling:
-                        prof_sort = "self_cpu_time_total"
-                        activities=[torch.profiler.ProfilerActivity.CPU]
-                        if args.gpu is not None:
-                            activities.append(torch.profiler.ProfilerActivity.CUDA)
-                            prof_sort = "self_cuda_time_total"
+                    if args.gpu is not None:
+                        images = images.cuda(args.gpu, non_blocking=True)
 
-                    with torch.profiler.profile(activities=activities, record_shapes=False) as prof:
-                        if args.gpu is not None:
-                            images = images.cuda(args.gpu, non_blocking=True)
+                    # compute output
+                    output = model(images)
 
-                        # compute output
-                        output = model(images)
+                    # sync for time measurement
+                    if args.gpu is not None:
+                        torch.cuda.synchronize(args.gpu)
 
-                        # sync for time measurement
-                        if args.gpu is not None:
-                            torch.cuda.synchronize(args.gpu)
-
-                    if profiling:
-                        torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.pt')
+                if profiling:
+                    prof.step()
 
                 # D2H
                 output = output.cpu()
@@ -1079,42 +1116,63 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     if args.non_blocking:
         non_blocking = True
 
-    with torch.inference_mode():
+    # config profiler
+    import contextlib
+    def profiler_setup(profiling=False, *args, **kwargs):
+        if profiling:
+            return torch.profiler.profile(*args, **kwargs)
+        else:
+            return contextlib.nullcontext()
+    activities = [torch.profiler.ProfilerActivity.CPU]
+    if args.xpu is not None:
+        activities.append(torch.profiler.ProfilerActivity.XPU)
+    elif args.gpu is not None:
+        activities.append(torch.profiler.ProfilerActivity.CUDA)
+    # fixed wait iters = 1, active iters = 1, warmup_iters = 3, at_least 5 iters
+    # more iters will be skipped, and repeat will be fixed to 1
+    num_iters = args.num_iterations if args.num_iterations else len(val_loader)
+    skip_iters = max(num_iters - 5, 0)
+    schedule = torch.profiler.schedule(skip_first=skip_iters,
+                                       wait=1, warmup=3, active=1)
+    def trace_handle(prof):
+        if args.xpu is not None:
+            torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.int8.inf.pt')
+
+    # start profiler, or none while profiling is false
+    with profiler_setup(profiling, activities=activities, schedule=schedule, on_trace_ready=trace_handle) as prof, torch.inference_mode():
         for i, (images, target) in enumerate(val_loader):
             if args.xpu is not None and args.benchmark == 1:
                 images = images.to(args.xpu, non_blocking = non_blocking)
 
-            with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
-                try:
-                    import memory_check
-                    memory_check.display_mem("xpu:0")
-                except:
-                    pass
-                start = time.time()
-                if args.xpu is not None and args.benchmark == 0:
-                    images = images.to(args.xpu, non_blocking = non_blocking)
-                if args.channels_last:
-                    images = images.to(memory_format=torch.channels_last)
+            try:
+                import memory_check
+                memory_check.display_mem("xpu:0")
+            except:
+                pass
+            start = time.time()
+            if args.xpu is not None and args.benchmark == 0:
+                images = images.to(args.xpu, non_blocking = non_blocking)
+            if args.channels_last:
+                images = images.to(memory_format=torch.channels_last)
 
-                # compute output
-                output = model(images)
+            # compute output
+            output = model(images)
 
-                # D2H
-                output = output.to("cpu")
+            # D2H
+            output = output.to("cpu")
 
-                # sync for time measurement
-                torch.xpu.synchronize(args.xpu)
+            # sync for time measurement
+            torch.xpu.synchronize(args.xpu)
 
-                # measure elapsed time
-                end = time.time()
-                batch_time.update(end - start)
-                duration_eval = end - start
-
-            if profiling:
-                torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.int8.inf.pt')
-                torch.save(prof.table(sort_by="id", row_limit=100000), './profiling.detailed.int8.inf.pt')
+            # measure elapsed time
+            end = time.time()
+            batch_time.update(end - start)
+            duration_eval = end - start
 
             loss = criterion(output, target)
+
+            if profiling:
+                prof.step()
 
             # measure accuracy and record loss
             acc1, acc5 = accuracy(output, target, topk=(1, 5))

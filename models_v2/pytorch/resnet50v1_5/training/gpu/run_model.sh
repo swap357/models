@@ -39,26 +39,27 @@ OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
 if [[ "${PLATFORM}" == "PVC" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-256}
-    PRECISION=${PRECISION:-bf16}
+    PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
-elif [[ "${PLATFORM}" == "ATS-M" ]]; then
+elif [[ "${PLATFORM}" == "ARC" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
-        echo "ATS-M not support multitile"
+        echo "ARC not support multitile"
         exit 1
     fi
-    BATCH_SIZE=${BATCH_SIZE:-128}
-    PRECISION=${PRECISION:-bf16}
+    BATCH_SIZE=${BATCH_SIZE:-256}
+    PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
+
 fi
 
-if [[ "${PRECISION}" == "bf16" ]]; then
+if [[ "${PRECISION}" == "BF16" ]]; then
     flag="--bf16 1 "
-elif [[ "${PRECISION}" == "fp32" ]]; then
+elif [[ "${PRECISION}" == "FP32" ]]; then
     flag=""
-elif [[ "${PRECISION}" == "tf32" ]]; then
+elif [[ "${PRECISION}" == "TF32" ]]; then
     flag="--tf32 1 "
 else
-    echo -e "Invalid input! Only bf16 fp32 tf32 are supported."
+    echo -e "Invalid input! Only BF16 FP32 TF32 are supported."
     exit 1
 fi
 
@@ -96,7 +97,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
         ${DATASET_DIR} \
         --num-iterations ${NUM_ITERATIONS} \
         $flag 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log
-    python ../../../../../common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
+    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -105,7 +106,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
     mpiexec -np 2 -ppn 2 --prepend-rank python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
-    python ../../../../../common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
+    python ../../../../../models/common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
     latency=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep Latency | awk -F ' ' '{print $2}')

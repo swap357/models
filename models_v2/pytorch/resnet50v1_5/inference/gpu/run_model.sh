@@ -38,7 +38,7 @@ OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
 if [[ "${PLATFORM}" == "PVC" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-1024}
-    PRECISION=${PRECISION:-int8}
+    PRECISION=${PRECISION:-INT8}
     NUM_ITERATIONS=${NUM_ITERATIONS:-500}
 elif [[ "${PLATFORM}" == "ATS-M" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
@@ -46,7 +46,15 @@ elif [[ "${PLATFORM}" == "ATS-M" ]]; then
 	exit 1
     fi
     BATCH_SIZE=${BATCH_SIZE:-1024}
-    PRECISION=${PRECISION:-int8}
+    PRECISION=${PRECISION:-INT8}
+    NUM_ITERATIONS=${NUM_ITERATIONS:-500}
+elif [[ "${PLATFORM}" == "ARC" ]]; then
+    if [[ "${MULTI_TILE}" == "True" ]]; then
+        echo "ARC not support multitile"
+        exit 1
+    fi
+    BATCH_SIZE=${BATCH_SIZE:-256}
+    PRECISION=${PRECISION:-INT8}
     NUM_ITERATIONS=${NUM_ITERATIONS:-500}
 fi
 
@@ -77,18 +85,18 @@ echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
 echo " MULTI_TILE: ${MULTI_TILE}"
 
-if [[ "${PRECISION}" == "int8" ]]; then
+if [[ "${PRECISION}" == "INT8" ]]; then
     flag="--int8 1 "
-elif [[ "${PRECISION}" == "bf16" ]]; then
+elif [[ "${PRECISION}" == "BF16" ]]; then
     flag="--bf16 1 "
-elif [[ "${PRECISION}" == "fp32" ]]; then
+elif [[ "${PRECISION}" == "FP32" ]]; then
     flag=""
-elif [[ "${PRECISION}" == "tf32" ]]; then
+elif [[ "${PRECISION}" == "TF32" ]]; then
     flag="--tf32 1 "
-elif [[ "${PRECISION}" == "fp16" ]]; then
+elif [[ "${PRECISION}" == "FP16" ]]; then
     flag="--fp16 1 "
 else
-    echo -e "Invalid input! Only bf16 fp32 tf32 fp16 int8 are supported."
+    echo -e "Invalid input! Only BF16 FP32 TF32 FP16 INT8 are supported."
     exit 1
 fi
 echo "resnet50 ${PRECISION} inference plain MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
@@ -125,7 +133,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
         --num-iterations ${NUM_ITERATIONS} \
         --benchmark 1 \
         ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python ../../../../../common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -155,8 +163,8 @@ else
         --benchmark 1 \
         ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log
     wait
-    python ../../../../../common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    python ../../../../../common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
+    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
     sum_log_analysis ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
