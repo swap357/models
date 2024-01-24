@@ -8,6 +8,14 @@
 # Pre-Requisite
 * Host has Intel® Data Center GPU Max
 * Host has installed latest Intel® Data Center GPU Max Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* The following Intel® oneAPI Base Toolkit components are required:
+  - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
+  - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
+  - Intel® oneAPI MPI Library
+  - Intel® oneAPI TBB Library
+  - Intel® oneAPI CCL Library
+
+  Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Dataset 
 Using TensorFlow Datasets.
@@ -23,9 +31,26 @@ Download the ImageNet dataset and convert it to TFRecord format. The following [
 ## Training
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/tensorflow/resnet50v1_5/training/gpu`
-3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-4. Activate virtual env: `. ./venv/bin/activate`
-5. Setup required environment paramaters
+3. create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
+6. If you run multi-tile (export MULTI_TILE=True), please install "intel-optimization-for-horovod" with `pip install intel-optimization-for-horovod`
+7. Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
+    ```bash
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
+    source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
+8. Setup required environment paramaters
   There are several config yaml files in configure and hvd_configure folder. Set one of them as CONFIG_FILE, then model would correspondly run with `real data` or `dummy data`. Single-tile please use yaml file in configure folder. Distribute training please use yaml file in hvd_configure folder, `itex_bf16_lars.yaml`/`itex_fp32_lars.yaml` for HVD real data and `itex_dummy_bf16_lars.yaml`/`itex_dummy_fp32_lars.yaml` for HVD dummy data.
 Export those parameters to script or environment.
 

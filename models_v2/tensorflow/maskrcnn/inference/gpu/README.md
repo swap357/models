@@ -4,17 +4,25 @@ Mask RCNN Inference using Intel® Extension for TensorFlow.
 
 ## Model Information
 
-| **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** 
-| :---: | :---: | :---: | :---: |:----------:|
-|   training   |  TensorFlow   | [DeepLearningExamples/MaskRCNN](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow2/Segmentation/MaskRCNN) |        5be8a3cae21ee2d80e3935a4746827cb3367bcac         |  [EnableInference.patch](#EnableInference.patch)       |
+| **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Weight** | **Optional Patch** |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+|   Inference   |  Tensorflow   | [DeepLearningExamples/MaskRCNN](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow2/Segmentation/MaskRCNN) |        master         | See Section [Prerequisites](#weight) | [EnableInference.patch](#inference patch) |
 
 # Pre-Requisite
 * Host has Intel® Data Center GPU MAX or FLEX
 * Host has installed latest Intel® Data Center GPU Max & Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 * Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
+* The following Intel® oneAPI Base Toolkit components are required:
+  - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
+  - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
+  - Intel® oneAPI MPI Library
+  - Intel® oneAPI TBB Library
+  - Intel® oneAPI CCL Library
+
+  Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Dataset 
-Download & preprocess COCO 2017 dataset.
+Download & preprocess COCO 2017 dataset. 
 ```
 export DATASET_DIR=/path/to/dataset/dir
 git clone https://github.com/NVIDIA/DeepLearningExamples.git
@@ -25,30 +33,51 @@ bash download_and_preprocess_coco.sh $DATASET_DIR
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/tensorflow/maskrcnn/inference/gpu`
-3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-4. Download weights
+3. Create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
+6. Download weights
     ```
         pushd .
         cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
         python scripts/download_weights.py --save_dir=./weights
         popd 
     ```
-5. Setup required environment paramaters
+7. Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
+    ```bash
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
+    source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
+8. Setup required environment paramaters
 
-    |   **Parameter**    |                   **export command**                   |
-    |:------------------------------------------------------:| :--- |
-    |  **DATASET_DIR**   |       `export DATASET_DIR=/the/path/to/dataset`        |
-    |   **PRETRAINED_DIR**   | `export PRETRAINED_DIR=/the/path/to/pretrained_model/` |
-    |   **PRECISION**   |         `export PRECISION=fp16` (fp16 or fp32)         |
-    |   **BATCH_SIZE** (optional)  |                 `export BATCH_SIZE=16`                 |
-6. Run `run_model.sh`
+    |   **Parameter**    | **export command**                                    |
+    | :---: | :--- |
+    |  **DATASET_DIR**   | `export DATASET_DIR=/the/path/to/dataset`             |
+    |   **PRETRAINED_DIR**   | `export PRETRAINED_DIR=/the/path/to/pretrained_dir`           |
+    |   **BATCH_SIZE** (optional)   | `export BATCH_SIZE=4`           |
+    **NOTE**: FLEX type GPU only supports fp16 and fp32 precision. Max GPU supports all Precisions.
+    |   **PRECISION**   | `export PRECISION=bfloat16` (bfloat16 or fp32, fp16)           |
+8. Run `run_model.sh`
 
 ## Output
 
-Output will typicall looks like:
+Output will typically looks like:
 ```
-2023-09-15 12:45:12.198281: I tensorflow/core/framework/local_rendezvous.cc:421] Local rendezvous recv item cancelled. Key hash: 15253968942006736824
-() {'predict_throughput': 32.896633477338334, 'predict_latency': 0.4863719569062287, 'predict_latency_90': 0.48666301561606345, 'predict_latency_95': 0.48671875026262756, 'predict_latency_99': 0.48682774246035293, 'predict_time': 166.06602716445923}
+2023-09-11 14:54:49,905 I dllogger        (1, 20) loss: 639.5632934570312
+2023-09-11 14:54:49,906 I dllogger        (1, 20) train_time: 23.89216899871826, train_throughput: 21.438093303125907
+2023-09-11 14:54:49,914 I dllogger        (1,) loss: 639.5632934570312
+2023-09-11 14:54:49,914 I dllogger        () loss: 639.5632934570312
+2023-09-11 14:54:49,915 I dllogger        () train_time: 23.90118169784546, train_throughput: 23.507529269636105
 ```
 
 Final results of the training run can be found in `results.yaml` file.

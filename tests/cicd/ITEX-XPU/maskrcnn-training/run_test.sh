@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-echo "Setup ITEX-XPU Test Enviroment for MaskRCNN Inference"
+echo "Setup ITEX-XPU Test Enviroment for MaskRCNN Training"
 
 PRECISION=$1
-OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/ITEX-XPU/maskrcnn-inference/${PRECISION}"}
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/ITEX-XPU/maskrcnn-training/${PRECISION}"}
 is_lkg_drop=$2
 DATASET=$3
 
@@ -22,11 +22,12 @@ else
 fi
 
 # run following script
-cd models_v2/tensorflow/maskrcnn/inference/gpu
+cd models_v2/tensorflow/maskrcnn/training/gpu
 ./setup.sh
 pushd .
 cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
 python scripts/download_weights.py --save_dir=./weights
 popd
-OUTPUT_DIR=${OUTPUT_DIR} PRECISION=${PRECISION} PRETRAINED_DIR="DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN/weights" DATASET_DIR=${DATASET} ./run_model.sh
+pip install intel-optimization-for-horovod
+OUTPUT_DIR=${OUTPUT_DIR} PRECISION=${PRECISION} DATASET_DIR=${DATASET} MULTI_TILE=False ./run_model.sh
 cd - 

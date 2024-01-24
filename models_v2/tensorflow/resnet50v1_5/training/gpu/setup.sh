@@ -21,27 +21,5 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
+apt-get update && apt-get install -y python3-venv
 pip install -r requirements.txt
-
-#Prepare single tile model code
-script_path="$(realpath "$0")"
-workspace=$(dirname "$script_path")
-mkdir $workspace/resnet50/ && cd $workspace/resnet50/
-git clone -b v2.8.0 https://github.com/tensorflow/models.git tensorflow-models
-cd tensorflow-models
-git apply $workspace/resnet50.patch
-cd $workspace
-
-#Prepare multi-tile model code 
-mkdir $workspace/resnet50_hvd/ && cd $workspace/resnet50_hvd/
-git clone -b v2.8.0 https://github.com/tensorflow/models.git tensorflow-models
-cd tensorflow-models
-git apply $workspace/hvd_support.patch
-
-
-
-
-

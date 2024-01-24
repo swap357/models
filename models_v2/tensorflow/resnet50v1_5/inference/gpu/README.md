@@ -11,6 +11,14 @@ Best known method of ResNet50v1.5 Inference(float32, float16, bfloat16, tensorfl
 # Pre-Requisite
 * Host has Intel® Data Center GPU Max or Flex
 * Host has installed latest Intel® Data Center GPU Max & Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* The following Intel® oneAPI Base Toolkit components are required:
+  - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
+  - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
+  - Intel® oneAPI MPI Library
+  - Intel® oneAPI TBB Library
+  - Intel® oneAPI CCL Library
+
+  Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Dataset 
   to download and preprocess the ImageNet validation
@@ -45,6 +53,7 @@ logging in.
    pip install intel-tensorflow
    pip install -I urllib3
    pip install wget
+   deactivate
    ```
 
 3. Download and run the [imagenet_to_tfrecords.sh](imagenet_to_tfrecords.sh) script and pass
@@ -90,23 +99,50 @@ logging in.
    ...
    ```
 ## Inference
-1. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-2. Activate virtual env: `. ./venv/bin/activate`
-3. Setup required environment paramaters
-#### Set Model Parameters
-Export those parameters to script or environment.
-| **Parameter** | **export |
-| :---: | :--- |
-| **DATASET_DIR** | `export DATASET_PATH=/the/path/to/ImageNet` (accuracy mode need) |
-| **PB_FILE_PATH** | `export PB_FILE_PATH=/the/path/to/xx.pb` (int8:resnet50_v1_int8.pb, others:resnet50_v1.pb)|
-| **BATCH_SIZE** | `export BATCH_SIZE=1024` (optional, default is 1024) |
-| **TEST_TYPE** | `export TEST_MODE=inference` (inference or accuracy) |
-| **DTYPE** | `export PRECISION=float32` (float32,tensorfloat32,float16 ,bfloat16 or int8) |         |
-4. Run `run_model.sh`
+1. `git clone https://github.com/IntelAI/models.git`
+2. `cd models/models_v2/tensorflow/resnet50v1_5/inference/gpu`
+3. create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
+6. Download the PB files (pre trained models) and the set the path for PB_FILE_PATH:
+   ```
+   # For int8:
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1_int8.pb
+
+   # For float32, tensorflow32, float16 and bfloat16:
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb
+   ```
+7. Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
+    ```bash
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
+    source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
+8. Setup required environment paramaters
+   #### Set Model Parameters
+   Export those parameters to script or environment.
+   | **Parameter** | **export** |
+   | :---: | :---: |
+   | **DATASET_DIR** | `export DATASET_PATH=/the/path/to/ImageNet` (accuracy mode need) |
+   | **PB_FILE_PATH** | `export PB_FILE_PATH=/the/path/to/xx.pb` (int8:resnet50_v1_int8.pb, others:resnet50_v1.pb)|
+   | **BATCH_SIZE** | `export BATCH_SIZE=1024` (optional, default is 1024) |
+   | **TEST_MODE** | `export TEST_MODE=inference` (inference or accuracy) |
+   **NOTE**: FLEX type GPU only supports int8, float16 and float32 precision. Max GPU supports all DTYPES. 
+   | **DTYPE** | `export PRECISION=float32` (float32,tensorfloat32,float16 ,bfloat16 or int8) |    
+8. Run `run_model.sh`
 
 ## Output
 
-Output will typicall looks like:
+Output will typically looks like:
 #inference
 ```
 Iteration 4997: 0.xxxx sec

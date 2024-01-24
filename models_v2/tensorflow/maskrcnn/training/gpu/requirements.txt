@@ -17,8 +17,6 @@
 #
 #
 
-tensorflow
-intel-extension-for-tensorflow[xpu]
 opencv-python-headless
 pybind11
 pycocotools

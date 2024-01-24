@@ -22,13 +22,15 @@
 
 set -e
 apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
 pip install -r requirements.txt
 
-git clone https://github.com/NVIDIA/DeepLearningExamples.git
-cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
-git checkout c481324031ecf0f70f8939516c02e16cac60446d
-git apply  ../../../../EnableBF16.patch
-cd -
-
+current_dir=$(pwd)
+if [ -d "DeepLearningExamples" ]; then
+  echo "Repository already exists. Skipping clone."
+else
+  git clone https://github.com/NVIDIA/DeepLearningExamples.git
+  cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
+  git checkout c481324031ecf0f70f8939516c02e16cac60446d
+  git apply  $current_dir/EnableBF16.patch
+  cd -
+fi
