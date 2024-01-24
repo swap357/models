@@ -47,6 +47,9 @@ on:
         required: true
         default: 2.14.0.1
         type: string
+      torchvision_version:
+        required: false
+        type: string
       aikit_release:
         description: 'Target AIKit version'
         required: false
@@ -77,6 +80,9 @@ on:
       framework_extension_version:
         required: true
         type: string
+      torchvision_version:
+        required: false
+        type: string
       aikit_release:
         description: 'Target AIKit version'
         required: true
@@ -90,8 +96,10 @@ on:
 
 env:
   IS_LKG_DROP: ${{ inputs.is_lkg_drop || false }}
+  RUNNER: ${{ inputs.runner_label || 'flex-gpu' }}
   FRAMEWORK_VERSION: ${{ inputs.framework_version || '2.14.0' }}
   FRAMEWORK_EXTENSION_VERSION : ${{ inputs.framework_extension_version || '2.14.0.1' }}
+  TORCHVISION_VERSION: ${{ inputs.torchvision_version || '0.16.2' }}
   AIKIT_VERSION: ${{ inputs.aikit_release || '2024.0.0' }}
   PHASE: ${{ inputs.phase || 'inference' }}
   DEVICE: ${{ inputs.device || 'gpu' }}
@@ -127,6 +135,7 @@ jobs:
       volumes:
         - /tf_dataset/:/tf_dataset/
         - /pytorch:/pytorch/
+        - /opt/intel/oneapi:/oneapi/
       options: --privileged
     strategy:
       matrix:
