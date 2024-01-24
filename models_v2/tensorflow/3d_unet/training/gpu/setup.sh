@@ -21,31 +21,5 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
+apt-get update && apt-get install -y python3-venv 
 pip install -r requirements.txt
-
-script_path="$(realpath "$0")"
-workspace=$(dirname "$script_path")
-#Prepare single tile model code
-mkdir $workspace/3d_unet/ && cd $workspace/3d_unet/
-git clone https://github.com/NVIDIA/DeepLearningExamples.git
-cd DeepLearningExamples
-git checkout 88eb3cff2f03dad85035621d041e23a14345999e
-cd TensorFlow/Segmentation/UNet_3D_Medical/
-git apply $workspace/3dunet_itex.patch
-cd $workspace
-
-#Prepare multi-tile model code 
-mkdir $workspace/3d_unet_hvd/ && cd $workspace/3d_unet_hvd/
-git clone https://github.com/NVIDIA/DeepLearningExamples.git
-cd DeepLearningExamples
-git checkout 88eb3cff2f03dad85035621d041e23a14345999e
-cd TensorFlow/Segmentation/UNet_3D_Medical/
-git apply $workspace/3dunet_itex_with_horovod.patch
-
-
-
-
-

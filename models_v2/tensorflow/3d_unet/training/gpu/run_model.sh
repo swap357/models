@@ -64,6 +64,34 @@ echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: $BATCH_SIZE"
 echo " MULTI_TILE: $MULTI_TILE"
 
+current_dir=$(pwd)
+if [ $MULTI_TILE == "True" ];then
+  if [ -d "DeepLearningExamples" ]; then
+    echo "Repository already exists. Skipping clone."
+  else
+    mkdir $current_dir/3d_unet_hvd/ && cd $current_dir/3d_unet_hvd/
+    git clone https://github.com/NVIDIA/DeepLearningExamples.git
+    cd DeepLearningExamples
+    git checkout 88eb3cff2f03dad85035621d041e23a14345999e
+    cd TensorFlow/Segmentation/UNet_3D_Medical/
+    git apply $current_dir/3dunet_itex_with_horovod.patch
+    cd $current_dir
+  fi
+else
+  if [ -d "DeepLearningExamples" ]; then
+    echo "Repository already exists. Skipping clone."
+  else
+    mkdir $current_dir/3d_unet/ && cd $current_dir/3d_unet/
+    git clone https://github.com/NVIDIA/DeepLearningExamples.git
+    cd DeepLearningExamples
+    git checkout 88eb3cff2f03dad85035621d041e23a14345999e
+    cd TensorFlow/Segmentation/UNet_3D_Medical/
+    git apply $current_dir/3dunet_itex.patch
+    cd $current_dir
+  fi
+fi
+
+
 if [ $MULTI_TILE == "True" ];then
   cd 3d_unet_hvd/DeepLearningExamples/TensorFlow/Segmentation/UNet_3D_Medical/
   mpirun -np 2 -prepend-rank -ppn 2 \
