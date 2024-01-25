@@ -41,7 +41,16 @@ The scripts will download the dataset automatically. It uses nateraw/parti-promp
   ```
   python -m pip install torch torchvision intel-extension-for-pytorch --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
   ```
-6. Setup required environment paramaters
+6. Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
+    ```bash
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
+    source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
+    ```
+7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
@@ -50,7 +59,7 @@ The scripts will download the dataset automatically. It uses nateraw/parti-promp
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1`                                |
 | **PRECISION** (optional)     |           `export PRECISION=fp16` (fp16 and fp32 are supported for all platform)|
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
-6. Run `run_model.sh`
+8. Run `run_model.sh`
 
 > [!NOTE]
 > Refer to [CONTAINER_FLEX.md](CONTAINER_FLEX.md) and [CONTAINER_MAX.md](CONTAINER_MAX.md) for Stable Diffusion Inference instructions using docker containers.
