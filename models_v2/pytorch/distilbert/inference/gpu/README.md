@@ -72,6 +72,8 @@ the dataset should be like below
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=300`                             |
 8. Run `run_model.sh`
 
+> [!NOTE]
+> Refer to [CONTAINER_FLEX.md](CONTAINER_FLEX.md) and [CONTAINER_MAX.md](CONTAINER_MAX.md) for DistilBERT inference instructions using docker containers.
 ## Output
 
 Single-tile output will typically looks like:

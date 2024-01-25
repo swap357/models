@@ -24,6 +24,7 @@ declare -A input_envs
 input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i

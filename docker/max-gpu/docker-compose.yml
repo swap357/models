@@ -102,6 +102,11 @@ services:
       dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+  pytorch-distilbert-inference:
+    build:
+      dockerfile: docker/max-gpu/pytorch-distilbert-inference/pytorch-max-series-distilbert-inference.Dockerfile
+    extends: pytorch-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-distilbert-inference
   pytorch-stable-diffusion-inference:
     build:
       dockerfile: docker/max-gpu/pytorch-stable-diffusion-inference/pytorch-max-series-stable-diffusion-inference.Dockerfile

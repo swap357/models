@@ -1,0 +1,36 @@
+fp32-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    MULTI_TILE: 'False'
+    PLATFORM: Flex
+    BATCH_SIZE: '32'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /localdisk/sramakr1/hdf5_seq_512/
+    PRECISION: FP32
+    NUM_ITERATIONS: '300'
+  volumes:
+    - src: /localdisk/sramakr1/hdf5_seq_512/
+      dst: /localdisk/sramakr1/hdf5_seq_512/
+    - src: /tmp
+      dst: /tmp
+fp16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    MULTI_TILE: 'False'
+    PLATFORM: Flex
+    BATCH_SIZE: '32'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /localdisk/sramakr1/hdf5_seq_512/
+    PRECISION: FP16
+    NUM_ITERATIONS: '300'
+  volumes:
+    - src: /localdisk/sramakr1/hdf5_seq_512/
+      dst: /localdisk/sramakr1/hdf5_seq_512/
+    - src: /tmp
+      dst: /tmp

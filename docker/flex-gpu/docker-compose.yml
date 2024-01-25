@@ -27,7 +27,10 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ""
+<<<<<<< HEAD
+=======
         NO_PROXY: ""
+>>>>>>> develop
         PYT_BASE_IMAGE: ${PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
         PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu}
       dockerfile: docker/flex-gpu/pytorch-resnet50v1-5-inference/pytorch-flex-series-resnet50v1-5-inference.Dockerfile
@@ -91,6 +94,11 @@ services:
       dockerfile: docker/flex-gpu/tf-efficientnet-inference/tf-flex-series-efficientnet-inference.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  pytorch-distilbert-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-distilbert-inference/pytorch-flex-series-distilbert-inference.Dockerfile
+    extends: pytorch-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
   tf-wide-deep-large-inference:
     build:
       dockerfile: docker/flex-gpu/tf-wide-deep-large-inference/tf-flex-series-wide-deep-large-inference.Dockerfile
