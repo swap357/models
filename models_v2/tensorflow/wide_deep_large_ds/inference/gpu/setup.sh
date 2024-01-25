@@ -16,4 +16,6 @@
 #
 
 set -e
-apt-get update && apt-get install -y python3-venv 
+apt-get update && apt-get install -y python3-venv protobuf-compiler
+apt-get install -y --no-install-recommends parallel pciutils numactl
+

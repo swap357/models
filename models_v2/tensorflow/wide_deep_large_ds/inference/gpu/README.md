@@ -8,13 +8,14 @@ Wide and Deep Large Model Inference Intel® Extension for TensorFlow.
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
 |  Inference   |  TensorFlow   |       -        |           -           |         -          |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for Wide and Deep Inference instructions using docker containers.
+
 # Pre-Requisite
 
-* Host has Intel® Data Center GPU FLEX
-* Host has installed latest Intel® Data Center GPU Flex Series
-  Driver https://dgpu-docs.intel.com/driver/installation.html
+* Host has Intel® Data Center GPU Flex Series
+* Host has installed latest Intel® Data Center GPU Flex Series Driver https://dgpu-docs.intel.com/driver/installation.html
 
-# Dataset
+# Dataset and pretrained model
 * Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/large_kaggle_advertising_challenge/README.md) to download and preprocess the Large Kaggle Display Advertising Challenge Dataset.
 
 ## Inference
@@ -38,11 +39,12 @@ Wide and Deep Large Model Inference Intel® Extension for TensorFlow.
 |:------------------------:|:-------------------------------------------------------------:|
 |     **DATASET_PATH**     |          `export DATASET_PATH=/the/path/to/dataset`           |
 |     **PB_FILE_PATH**     |             `export PB_FILE_PATH=/the/path/to/pb`             |
+|     **GPU_TYPE**         |             `export GPU_TYPE=<flex_170 or flex_140>`          |
 | **BATCH_SIZE**(optional) |          `export BATCH_SIZE=10000`                            |
 
 ## Output
 
-Output will typicall looks like:
+Output typically looks like:
 
 ```
 --------------------------------------------------
