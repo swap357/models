@@ -8,6 +8,7 @@ Bert-Large Model Training using Intel® Extension for TensorFlow.
 | :---: | :---: |:---------------------------------:| :---: | :---: |
 |   training   |  TensorFlow   | [NVIDIA/DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow2/LanguageModeling/BERT) |        master         | [bert-large-itex-bf16.patch](#bert-large-itex-bf16.patch) |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for BERT-Large training instructions using docker containers.
 # Pre-Requisite
 
 * Host has Intel® Data Center GPU Max.

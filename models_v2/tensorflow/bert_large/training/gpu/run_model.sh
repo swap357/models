@@ -120,6 +120,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${RESULTS_DIR}/results.yaml
 echo "YAML file created."
-
