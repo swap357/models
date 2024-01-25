@@ -8,9 +8,11 @@ Mask RCNN Inference using Intel® Extension for TensorFlow.
 | :---: | :---: | :---: | :---: | :---: | :---: |
 |   Inference   |  Tensorflow   | [DeepLearningExamples/MaskRCNN](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow2/Segmentation/MaskRCNN) |        master         | See Section [Prerequisites](#weight) | [EnableInference.patch](#inference patch) |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for MaskRCNN Inference instructions using docker containers.
+
 # Pre-Requisite
-* Host has Intel® Data Center GPU MAX or FLEX
-* Host has installed latest Intel® Data Center GPU Max & Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* Host has Intel® Data Center GPU Flex Series
+* Host has installed latest Intel® Data Center GPU Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 * Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 * The following Intel® oneAPI Base Toolkit components are required:
   - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
@@ -63,15 +65,14 @@ bash download_and_preprocess_coco.sh $DATASET_DIR
     |   **Parameter**    | **export command**                                    |
     | :---: | :--- |
     |  **DATASET_DIR**   | `export DATASET_DIR=/the/path/to/dataset`             |
-    |   **PRETRAINED_DIR**   | `export PRETRAINED_DIR=/the/path/to/pretrained_dir`           |
     |   **BATCH_SIZE** (optional)   | `export BATCH_SIZE=4`           |
-    **NOTE**: FLEX type GPU only supports fp16 and fp32 precision. Max GPU supports all Precisions.
-    |   **PRECISION**   | `export PRECISION=bfloat16` (bfloat16 or fp32, fp16)           |
-8. Run `run_model.sh`
+    |   **PRECISION**   | `export PRECISION=bfloat16` (float16 or fp32)           |
+    |   **GPU_TYPE**    | `export GPU_TYPE=<flex_140 or flex_170>`                 |
+7. Run `run_model.sh`
 
 ## Output
 
-Output will typically looks like:
+Output typically looks like:
 ```
 2023-09-11 14:54:49,905 I dllogger        (1, 20) loss: 639.5632934570312
 2023-09-11 14:54:49,906 I dllogger        (1, 20) train_time: 23.89216899871826, train_throughput: 21.438093303125907

@@ -19,15 +19,15 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG BASE_TAG="xpu"
+ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TF_BASE_TAG="xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-WORKDIR /workspace/tf-flex-series-maskrcnn-inference
+WORKDIR /workspace/tf-flex-series-maskrcnn-inference/models
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
+    apt-get install -y --no-install-recommends parallel pciutils numactl
     
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
@@ -35,14 +35,14 @@ RUN apt-get update && \
 
 RUN python -m pip install opencv-python-headless pycocotools 
 
-COPY models/image_segmentation/tensorflow/maskrcnn/inference/gpu models/image_segmentation/tensorflow/maskrcnn/inference/gpu
-COPY quickstart/image_segmentation/tensorflow/maskrcnn/inference/gpu/inference.sh quickstart/inference.sh
+COPY models_v2/tensorflow/maskrcnn/inference/gpu .
 
 RUN pip install git+https://github.com/NVIDIA/dllogger.git
+
 RUN git clone https://github.com/NVIDIA/DeepLearningExamples.git && \
-    cd /workspace/tf-flex-series-maskrcnn-inference/DeepLearningExamples && \
+    cd DeepLearningExamples && \
     git checkout 5be8a3cae21ee2d80e3935a4746827cb3367bcac && \
-    mv /workspace/tf-flex-series-maskrcnn-inference/models/image_segmentation/tensorflow/maskrcnn/inference/gpu/EnableInference.patch . && \
+    mv /workspace/tf-flex-series-maskrcnn-inference/models/EnableInference.patch . && \
     git apply EnableInference.patch && \
     cd -
 

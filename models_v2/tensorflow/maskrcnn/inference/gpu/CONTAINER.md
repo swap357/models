@@ -7,9 +7,9 @@ This document has instructions for running MaskRCNN inference using Intel® Exte
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
-| Host machine  | Intel® Data Center GPU Flex Series 170 or 140  |
-| Drivers | GPU-compatible drivers need to be installed: [Download Driver 647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
-| Software | Docker* Installed |
+| Host machine  | [Intel® Data Center GPU Flex Series](https://ark.intel.com/content/www/us/en/ark/products/series/230021/intel-data-center-gpu-flex-series.html) 170 or 140  |
+| Drivers | GPU-compatible drivers need to be installed: [Download Driver](https://dgpu-docs.intel.com/driver/installation.html)
+| Software | Docker* |
 
 ## Get Started
 
@@ -23,7 +23,7 @@ Download and pre-process the datasets using script `download_and_preprocess_coco
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `inference` | Runs batch and online inference for FP16 precision on Flex series 170 and 140 |
+| `run_model.sh` | Runs batch and online inference for FP16 precision on Flex series 170 and 140 |
 
 ## Run Using Docker
 
@@ -34,19 +34,23 @@ docker pull intel/image-segmentation:tf-flex-gpu-maskrcnn-inference
 ```
 
 ### Run Docker Image
-The MaskRCNN inference container includes scripts,model and libraries need to run FP16 batch and online inference. To run the inference quickstart script using this container, you'll need to provide volume mounts for the COCO processed dataset.You will need to provide an output directory where log files will be written. 
+The MaskRCNN inference container includes scripts,model and libraries needed to run FP16 batch and online inference. To run the inference script using this container, you'll need to provide volume mounts for the COCO processed dataset.You will also need to provide an output directory where log files will be written. 
 
 ```bash
-
-export IMAGE_NAME=intel/image-segmentation:tf-flex-gpu-maskrcnn-inference
-export PRECISION=<provide precision,supports fp16>
-export OUTPUT_DIR=<path to output directory>
+#Optional
 export BATCH_SIZE=<provide batch size. default batch for batch inference is 16>
+
+#Required
+export PRECISION=<provide precision,supports float16>
+export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed COCO dataset>
 export GPU_TYPE=<provide either flex_170 or flex_140>
 
+IMAGE_NAME=intel/image-segmentation:tf-flex-gpu-maskrcnn-inference
+SCRIPT=run_model.sh
+
 docker run -it \
-    --device=/dev/dri \
+  --device=/dev/dri \
   --ipc=host \
   --privileged \
   --env PRECISION=${PRECISION} \
@@ -62,9 +66,9 @@ docker run -it \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --rm -it \
   $IMAGE_NAME \
-  /bin/bash quickstart/inference.sh
+  /bin/bash $SCRIPT
   ```
-**Note:**  Add `--cap-add=SYS_NICE` to the `docker run` command for executing `inference.sh` on Flex series 140.
+**Note:**  Add `--cap-add=SYS_NICE` to the `docker run` command for executing `run_model.sh` on Flex series 140.
 
 ## Documentation and Sources
 
