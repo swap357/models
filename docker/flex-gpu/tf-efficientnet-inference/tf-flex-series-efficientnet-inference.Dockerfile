@@ -19,20 +19,16 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG BASE_TAG="xpu"
+ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TF_BASE_TAG="xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-WORKDIR /workspace/tf-flex-series-efficientnet-inference
+WORKDIR /workspace/tf-flex-series-efficientnet-inference/models
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
+RUN pip install pillow
 
-RUN pip install pillow 
-
-COPY models/image_recognition/tensorflow/efficientnet/inference/gpu/predict.py models/image_recognition/tensorflow/efficientnet/inference/gpu/predict.py 
-COPY quickstart/image_recognition/tensorflow/efficientnet/inference/gpu/batch_inference.sh quickstart/batch_inference.sh
+COPY models_v2/tensorflow/efficientnet/inference/gpu . 
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

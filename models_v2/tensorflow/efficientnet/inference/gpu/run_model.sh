@@ -22,6 +22,7 @@
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
 input_envs[MODEL_NAME]=${MODEL_NAME}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -39,8 +40,8 @@ echo 'Running with parameters:'
 echo " MODEL_NAME: ${MODEL_NAME}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 
-python predict.py -m $MODEL_NAME -b $BATCH_SIZE |& tee ${MODEL_NAME}_inference_BS${BATCH_SIZE}.log
-throughput=$(cat ${MODEL_NAME}_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $2}')
+python predict.py -m $MODEL_NAME -b $BATCH_SIZE |& tee ${OUTPUT_DIR}/${MODEL_NAME}_inference_BS${BATCH_SIZE}.log
+throughput=$(cat ${OUTPUT_DIR}/${MODEL_NAME}_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $2}')
 yaml_content=$(cat <<EOF
 results:
  - key: throughput
@@ -50,5 +51,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."

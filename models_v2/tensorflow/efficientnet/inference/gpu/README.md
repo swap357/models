@@ -8,11 +8,12 @@ EfficientNet Model Inference using Intel® Extension for TensorFlow.
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
 |  Inference   |  TensorFlow   |       -        |           -           |         -          |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for EfficientNet instructions using docker containers.
+
 # Pre-Requisite
 
-* Host has Intel® Data Center GPU FLEX
-* Host has installed latest Intel® Data Center GPU Flex Series
-  Driver https://dgpu-docs.intel.com/driver/installation.html
+* Host has Intel® Data Center GPU Flex Series
+* Host has installed latest Intel® Data Center GPU Flex Series Driver https://dgpu-docs.intel.com/driver/installation.html
 * Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 
 # Run the model
@@ -34,12 +35,12 @@ EfficientNet Model Inference using Intel® Extension for TensorFlow.
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MODEL_NAME**          | `export MODEL_NAME=EfficientNetB0` (EfficientNetB0, EfficientNetB3 or EfficientNetB4) |
 | **BATCH_SIZE** (optional) |                               `export BATCH_SIZE=128`                                |
+| **OUTPUT_DIR**          | `export OUTPUT_DIR=<path to output log files>` |
 7. Run `run_model.sh`
 
 ## Output
 
-Output will typically looks like:
-
+Output will typically look like:
 ```
 load data ......
 input shape (128, 224, 224, 3)
