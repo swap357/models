@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright (c) 2023 Intel Corporation
 #
@@ -14,15 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""Consts for bertsquad inference."""
 
-# setup.sh
-#  - install OS pkgs
-#  - should create virtual env & install pip  requirement.txt
-#  - git clones & applying patches
+ACC = {
+    "type": "total",
+    "pattern": r"\'f1\': (\d+.\d+)",
+    "unit": "f1",
+}
 
-set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
+PERF = {
+    "type": "total",
+    "pattern": r"bert_inf throughput:  (\d+.\d+)  sentences/s",
+    "inverse": False,
+    "multiply": False,
+    "use_batch_size": False,
+    "unit": "sent/s",
+}
 
-pip install -r requirements.txt
-
-cp -r ../../../../common .
+FUNCTIONAL = {
+    "pattern": r"\'f1\': \d+.\d+"
+}
