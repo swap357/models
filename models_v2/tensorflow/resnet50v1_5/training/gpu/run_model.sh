@@ -1,4 +1,3 @@
-#
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2023 Intel Corporation
@@ -110,5 +109,5 @@ EOF
 
 # Write the content to a YAML file
 
-echo "$yaml_content" >  ${script_directory}/results.yaml
-echo "YAML file created, path:$script_directory/results.yaml"
+echo "$yaml_content" > $OUTPUT_DIR/results.yaml
+echo "YAML file created, path: $OUTPUT_DIR/results.yaml"
