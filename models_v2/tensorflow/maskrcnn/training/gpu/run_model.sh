@@ -23,6 +23,7 @@
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
 input_envs[DATASET_DIR]=${DATASET_DIR}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 
 for i in "${!input_envs[@]}"; do
@@ -43,7 +44,6 @@ else
 fi
 
 BATCH_SIZE=${BATCH_SIZE:-4}
-OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 EPOCHS=${EPOCHS:-1}
 STEPS_PER_EPOCH=${STEPS_PER_EPOCH:-20}
 
@@ -102,6 +102,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
-

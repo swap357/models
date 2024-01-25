@@ -8,6 +8,7 @@ Mask RCNN Training using Intel® Extension for TensorFlow.
 | :---: | :---: | :---: |:-------------------------------:|:--------:|
 |   training   |  TensorFlow   | [DeepLearningExamples/MaskRCNN](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow2/Segmentation/MaskRCNN) |         master                  | [EnableBF16.patch](#bf16patch) |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for MaskRCNN training instructions using docker containers.
 # Pre-Requisite
 
 * Host has Intel® Data Center GPU Max

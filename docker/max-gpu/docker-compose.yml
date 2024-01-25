@@ -84,6 +84,11 @@ services:
       dockerfile: docker/max-gpu/tf-bert-large-training/tf-max-series-bert-large-training.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
+  tf-maskrcnn-training:
+    build:
+      dockerfile: docker/max-gpu/tf-maskrcnn-training/tf-max-series-maskrcnn-training.Dockerfile
+    extends: tf-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
   tf-3d-unet-training:
     build:
       dockerfile: docker/max-gpu/tf-3d-unet-training/tf-max-series-3d-unet-training.Dockerfile
