@@ -1,4 +1,3 @@
-#
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2023 Intel Corporation
@@ -24,6 +23,7 @@ declare -A input_envs
 input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -35,13 +35,12 @@ for i in "${!input_envs[@]}"; do
   fi
 done
 
-OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
-if [[ "${PLATFORM}" == "PVC" ]]; then
+if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-16}
     PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-10}
-elif [[ "${PLATFORM}" == "ATS-M" ]]; then
-    echo "only support PVC for platform"
+elif [[ "${PLATFORM}" == "Flex" ]]; then
+    echo "only support Max series GPU for platform"
 elif [[ "${PLATFORM}" == "ARC" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
 	echo "Only support MULTI_TILE=False when in arc platform"
@@ -78,12 +77,12 @@ echo "bert-large ${PRECISION} training MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} 
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
-modelname=bert
+modelname=ddp-bert
 
 if [[ ${MULTI_TILE} == "False" ]]; then
     rm ${OUTPUT_DIR}/${modelname}${PRECISION}_train_t0_raw.log
     python run_pretrain_mlperf.py --config_name=bert_config.json --input_dir=${DATASET_DIR} --output_dir=${OUTPUT_DIR} --eval_dir=${DATASET_DIR} --device=xpu --do_train --train_batch_size=${BATCH_SIZE} --gradient_accumulation_steps=1 --adamw --num-iterations ${NUM_ITERATIONS} ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -106,7 +105,7 @@ else
             --disable-broadcast-buffers \
             --large-first-bucket \
             --seed 123 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname --ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
     latency=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep Latency | awk -F ' ' '{print $2}')
@@ -129,6 +128,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
-
