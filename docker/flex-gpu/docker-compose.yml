@@ -27,10 +27,7 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ""
-<<<<<<< HEAD
-=======
         NO_PROXY: ""
->>>>>>> develop
         PYT_BASE_IMAGE: ${PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
         PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu}
       dockerfile: docker/flex-gpu/pytorch-resnet50v1-5-inference/pytorch-flex-series-resnet50v1-5-inference.Dockerfile
