@@ -88,8 +88,7 @@ def parse_log_min_for_hvd_ddp(log_path: str, pattern_dict: dict) -> Optional[flo
         return float(min(min_value))
     return None
 
-<<<<<<<< HEAD:models_v2/common/parse_result.py
-========
+
 def parse_log_max_for_hvd_ddp(log_path: str, pattern_dict: dict) -> Optional[float]:
     """Parse log and return matched value as total."""
     max_value = []
@@ -101,7 +100,7 @@ def parse_log_max_for_hvd_ddp(log_path: str, pattern_dict: dict) -> Optional[flo
     if max_value:
         return float(max(max_value))
     return None
->>>>>>>> develop:models/common/pytorch/parse_result.py
+
 
 def parse_log_mean(log_path: str, pattern_dict: dict) -> Optional[float]:
     """Parse log and return mean of matched values."""
@@ -156,13 +155,10 @@ def parse_log(args) -> None:
                 performance = parse_log_total_for_hvd_ddp(
                     args.log_dir, perf_pattern)
             elif perf_pattern["type"] == "mean":
-<<<<<<<< HEAD:models_v2/common/parse_result.py
                 performance = parse_log_mean(args.log_dir, perf_pattern)
-========
-                performance = parse_log_mean(log_dir, perf_pattern)
             elif perf_pattern["type"] == "max":
-                performance = parse_log_max_for_hvd_ddp(log_dir, perf_pattern)
->>>>>>>> develop:models/common/pytorch/parse_result.py
+                performance = parse_log_max_for_hvd_ddp(
+                    args.log_dir, perf_pattern)
         else:
             if perf_pattern["type"] == "total":
                 performance = parse_log_total(args.log_dir, perf_pattern)
