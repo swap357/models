@@ -28,14 +28,14 @@ input_envs[GPU_TYPE]=${GPU_TYPE}
 for i in "${!input_envs[@]}"; do
   var_name=$i
   env_param=${input_envs[$i]}
- 
+
   if [[ -z $env_param ]]; then
     echo "The required environment variable $var_name is not set" >&2
     exit 1
   fi
 done
 
-if [ -d ${DATASET_DIR} ];then
+if [ -d "${DATASET_DIR}" ]; then
   echo "DATASET_DIR is: "${DATASET_DIR}
 else
   echo "Error: the path of dataset does not exist!"
@@ -44,7 +44,7 @@ fi
 
 BATCH_SIZE=${BATCH_SIZE:-16}
 
-if [ ${PRECISION} == "float16" ];then
+if [ "${PRECISION}" == "float16" ]; then
   echo "PRECISION is float16"
   AMP="--amp"
 else
@@ -68,8 +68,8 @@ k=0
 
 cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
 
- if [[ ${GPU_TYPE} == flex_170 ]]; then 
-    if [[ ${device_id} == "56c0" ]]; then 
+ if [[ ${GPU_TYPE} == flex_170 ]]; then
+    if [[ ${device_id} == "56c0" ]]; then
       echo "Running ${PRECISION} MaskRCNN Inference on Flex 170"
       python scripts/inference.py \
       --data_dir=$DATASET_DIR \
@@ -78,7 +78,7 @@ cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
       --weights_dir=$PRETRAINED_WEIGHTS $AMP |& tee ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}.log
       value=$(cat ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}.log | grep -o "'predict_throughput': [0-9.]*" | awk -F ": " '{print $2}' | tail -1)
     fi
-elif [[ ${GPU_TYPE} == flex_140 ]]; then 
+elif [[ ${GPU_TYPE} == flex_140 ]]; then
     if [[ ${device_id} == "56c1" ]]; then
       BATCH_SIZE=1
       echo "Running ${PRECISION} MaskRCNN Inference with BATCH SIZE 1 on Flex 140"

@@ -10,7 +10,7 @@
     DATASET_DIR: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     OUTPUT_DIR: /tmp
   volumes:
-    - src: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+    - src: ${DATASET_DIR:-/tf_dataset/dataset/coco_dataset/COCO2017_training_data/}
       dst: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     - src: /tmp
       dst: /tmp
@@ -26,7 +26,7 @@
     DATASET_DIR: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     OUTPUT_DIR: /tmp
   volumes:
-    - src: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+    - src: ${DATASET_DIR:-/tf_dataset/dataset/coco_dataset/COCO2017_training_data/}
       dst: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     - src: /tmp
       dst: /tmp
@@ -42,7 +42,7 @@
     DATASET_DIR: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     OUTPUT_DIR: /tmp
   volumes:
-    - src: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+    - src: ${DATASET_DIR:-/tf_dataset/dataset/coco_dataset/COCO2017_training_data/}
       dst: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     - src: /tmp
       dst: /tmp
