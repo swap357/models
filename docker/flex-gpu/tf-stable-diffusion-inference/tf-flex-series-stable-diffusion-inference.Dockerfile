@@ -19,30 +19,28 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG BASE_TAG="xpu"
+ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TF_BASE_TAG="xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-WORKDIR /workspace/tf-flex-series-stable-diffusion-inference
+WORKDIR /workspace/tf-flex-series-stable-diffusion-inference/models
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing git
 
-COPY models/generative-ai/tensorflow/stable_diffusion/inference/gpu/ models/generative-ai/tensorflow/stable_diffusion/inference/gpu/
+COPY models_v2/tensorflow/stable_diffusion/inference/gpu/ .
 
-COPY quickstart/generative-ai/tensorflow/stable_diffusion/inference/gpu/online_inference.sh quickstart/online_inference.sh
-COPY quickstart/generative-ai/tensorflow/stable_diffusion/inference/gpu/accuracy.sh quickstart/accuracy.sh
 
 RUN git clone https://github.com/keras-team/keras-cv.git && \
     cd keras-cv && \
     git reset --hard 66fa74b6a2a0bb1e563ae8bce66496b118b95200 && \
-    mv /workspace/tf-flex-series-stable-diffusion-inference/models/generative-ai/tensorflow/stable_diffusion/inference/gpu/patch . && \
+    mv /workspace/tf-flex-series-stable-diffusion-inference/models/patch . && \
     git apply patch && \
     pip install matplotlib && \
     pip install .
 
-RUN python -m pip install scikit-image
+RUN python -m pip install scikit-image scipy==1.11.1
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

@@ -8,8 +8,10 @@ Stable Diffusion Inference using Intel® Extension for TensorFlow.
 |:---:| :---: | :---: |:----------------------------------------:| :---: |
 |  Inference   |  Tensorflow   | [keras-cv](https://github.com/keras-team/keras-cv.git) | 66fa74b6a2a0bb1e563ae8bce66496b118b95200 |  [patch](#patch) |
 
+**Note**: Refer to [CONTAINER.md](CONTAINER.md) for Stable Diffusion Inference instructions using docker containers.
+
 # Pre-Requisite
-* Host has Intel® Data Center GPU FLEX
+* Host has Intel® Data Center GPU Flex Series
 * Host has installed latest Intel® Data Center GPU Flex Series Driver https://dgpu-docs.intel.com/driver/installation.html
 * Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 
@@ -36,7 +38,7 @@ Stable Diffusion Inference using Intel® Extension for TensorFlow.
 
 ## Output
 
-Output will typicall looks like:
+Output typically looks like:
 ```
 50/50 [==============================] - 8s 150ms/step
 latency 153.37058544158936 ms, throughput 6.520155068331838 it/s

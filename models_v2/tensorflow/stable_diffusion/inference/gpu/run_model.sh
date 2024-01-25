@@ -22,6 +22,7 @@
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -48,5 +49,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
