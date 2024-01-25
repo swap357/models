@@ -6,11 +6,11 @@ Best known method of ResNet50v1.5 Inference(float32, float16, bfloat16, tensorfl
 | :---: | :---: | :---: | :---: | :---: |
 | inference | Tensorflow |[IntelAI/Models](https://github.com/IntelAI/models) | master | [resnet50_v1.pb](https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb) [resnet50_v1_int8.pb](https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1_int8.pb) | |
 
-<br>
+**Note:** Model files were copied and modified in this directory. Refer to [CONTAINER_FLEX.md](CONTAINER_FLEX.md) for ResNet50v1.5 Inference instructions using docker containers.
 
 # Pre-Requisite
-* Host has Intel® Data Center GPU Max or Flex
-* Host has installed latest Intel® Data Center GPU Max & Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* Host has Intel® Data Center GPU Flex Series
+* Host has installed latest Intel® Data Center GPU Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 * The following Intel® oneAPI Base Toolkit components are required:
   - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
   - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
@@ -21,7 +21,7 @@ Best known method of ResNet50v1.5 Inference(float32, float16, bfloat16, tensorfl
   Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Dataset 
-  to download and preprocess the ImageNet validation
+To download and preprocess the ImageNet validation
 and training images to get them into the TF records format. The scripts used
 are based on the conversion scripts from the
 [TensorFlow TPU repo](https://github.com/tensorflow/tpu) and have been adapted
@@ -135,14 +135,14 @@ logging in.
    | **DATASET_DIR** | `export DATASET_PATH=/the/path/to/ImageNet` (accuracy mode need) |
    | **PB_FILE_PATH** | `export PB_FILE_PATH=/the/path/to/xx.pb` (int8:resnet50_v1_int8.pb, others:resnet50_v1.pb)|
    | **BATCH_SIZE** | `export BATCH_SIZE=1024` (optional, default is 1024) |
-   | **TEST_MODE** | `export TEST_MODE=inference` (inference or accuracy) |
-   **NOTE**: FLEX type GPU only supports int8, float16 and float32 precision. Max GPU supports all DTYPES. 
+   | **TEST_MODE** | `export TEST_MODE=inference` (inference or accuracy)  |
    | **DTYPE** | `export PRECISION=float32` (float32,tensorfloat32,float16 ,bfloat16 or int8) |    
+   | **FLEX_GPU_TYPE** |  `export FLEX_GPU_TYPE=<flex_140 or flex_170>`      |
 8. Run `run_model.sh`
 
 ## Output
 
-Output will typically looks like:
+Output typically looks like:
 #inference
 ```
 Iteration 4997: 0.xxxx sec
