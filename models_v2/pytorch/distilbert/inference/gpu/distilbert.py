@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright (c) 2023 Intel Corporation
 #
@@ -14,16 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""Consts for distilbert inf."""
 
-# setup.sh
-#  - install OS pkgs
-#  - should create virtual env & install pip  requirement.txt
-#  - git clones & applying patches
+ACC = {
+    "type": "total",
+    "pattern": r"'acc': (.*),",
+    "unit": "acc",
+}
 
-set -e
-apt-get update && apt-get install -y python3-venv
+PERF = {
+    "type": "total",
+    "pattern": r"perf (\d+.\d+) sentences/s",
+    "inverse": False,
+    "multiply": False,
+    "use_batch_size": False,
+    "unit": "sent/s",
+}
 
-pip uninstall google-auth-oauthlib tb-nightly -y
-pip install -r requirements.txt
-
-cp -r ../../../../common .
+FUNCTIONAL = {
+    "pattern": r"perf (\d+.\d+) sentences/s",
+}

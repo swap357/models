@@ -36,11 +36,11 @@ for i in "${!input_envs[@]}"; do
 done
 
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
-if [[ "${PLATFORM}" == "PVC" ]]; then
+if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-32}
     PRECISION=${PRECISION:-FP16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-300}
-elif [[ "${PLATFORM}" == "ATS-M" ]]; then
+elif [[ "${PLATFORM}" == "Flex" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-32}
     PRECISION=${PRECISION:-FP16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-300}
@@ -92,7 +92,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
     rm ${OUTPUT_DIR}/${modelname}${PRECISION}_inf_t0_raw.log 
     
     python train.py --run_mode "eval" --jit --amp --device "xpu" --run_dtype ${PRECISION} --student_type "distilbert" --student_name "distilbert-base-uncased" --student_config "training_configs/distilbert-base-uncased.json" --teacher_type "bert"  --teacher_name "bert-base-uncased" --mlm --freeze_pos_embs --dump_path "${OUTPUT_DIR}/out" --data_file ${DATASET_DIR} --num_iteration ${NUM_ITERATIONS} --batch_size ${BATCH_SIZE} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -104,8 +104,8 @@ else
     ZE_AFFINITY_MASK=0.0 python train.py --run_mode "eval" --jit --amp --device "xpu" --run_dtype ${PRECISION} --student_type "distilbert" --student_name "distilbert-base-uncased" --student_config "training_configs/distilbert-base-uncased.json" --teacher_type "bert"  --teacher_name "bert-base-uncased" --mlm --freeze_pos_embs --dump_path "${OUTPUT_DIR}/out" --data_file ${DATASET_DIR} --num_iteration ${NUM_ITERATIONS} --batch_size ${BATCH_SIZE} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log &
     ZE_AFFINITY_MASK=0.1 python train.py --run_mode "eval" --jit --amp --device "xpu" --run_dtype ${PRECISION} --student_type "distilbert" --student_name "distilbert-base-uncased" --student_config "training_configs/distilbert-base-uncased.json" --teacher_type "bert"  --teacher_name "bert-base-uncased" --mlm --freeze_pos_embs --dump_path "${OUTPUT_DIR}/out1" --data_file ${DATASET_DIR} --num_iteration ${NUM_ITERATIONS} --batch_size ${BATCH_SIZE} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log
     wait
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
     sum_log_analysis ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
@@ -129,6 +129,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
-
