@@ -24,6 +24,7 @@ declare -A input_envs
 input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -34,8 +35,6 @@ for i in "${!input_envs[@]}"; do
     exit 1
   fi
 done
-
-OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
 if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-256}
@@ -103,7 +102,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
     mpiexec -np 2 -ppn 2 --prepend-rank python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
-    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
+    python common/parse_result.py -m $modelname --ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
     latency=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep Latency | awk -F ' ' '{print $2}')
@@ -128,4 +127,3 @@ EOF
 # Write the content to a YAML file
 echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
-

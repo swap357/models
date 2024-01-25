@@ -19,15 +19,19 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="xpu-max"
+ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG PYT_BASE_TAG="2.1.10-xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /workspace/pytorch-max-series-resnet50v1-5-inference
-COPY quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Max_Series.md README.md
-COPY models/image_recognition/pytorch/resnet50v1_5/inference/gpu models/image_recognition/pytorch/resnet50v1_5/inference/gpu
-COPY quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh quickstart/inference_block_format.sh
+USER root
+
+WORKDIR /workspace/pytorch-max-series-resnet50v1-5-inference/models
+
+COPY models_v2/pytorch/resnet50v1_5/inference/gpu .
+COPY models_v2/common common 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
+
+USER $USER

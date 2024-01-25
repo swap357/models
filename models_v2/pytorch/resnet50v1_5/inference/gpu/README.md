@@ -66,7 +66,7 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
 
 ## Output
 
-Single-tile output will typically looks like:
+Single-tile output will typically look like:
 
 ```
 Test: [500/500] Time  0.039 ( 0.042)    Loss 8.4575e+00 (8.4625e+00)    Acc@1   0.20 (  0.10)   Acc@5   0.59 (  0.50)

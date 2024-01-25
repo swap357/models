@@ -65,7 +65,7 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
 
 ## Output
 
-Single-tile output will typically looks like:
+Single-tile output will typically look like:
 
 ```
 Epoch: [0][ 20/196]     Time  0.148 ( 0.379)    Data  0.000 ( 0.218)    Loss 7.3804e+00 (8.0065e+00)    Acc@1   0.00 (  0.12)    Acc@5   0.39 (  0.45)
