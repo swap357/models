@@ -369,6 +369,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="number of test batches",
     )
     parser.add_argument(
+        "--warmup_batches",
+        type=int,
+        default=100,
+        help="number of test batches",
+    )
+    parser.add_argument(
         "--dataset_name",
         type=str,
         default="criteo_1t",
@@ -789,15 +795,15 @@ def _evaluate(
         while True:
             try:
                 logits, label, fw_t = eval_step(eval_model, iterator, it)
-                if it > 100:
+                if it > args.warmup_batches:
                     if enable_torch_profile:
                         p.step()
                     total_t += fw_t
-                    if log_freq != 0 and it % log_freq == 0 and it > 100:
+                    if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches:
                         assert not args.distributed_training
                         preds = [torch.cat(preds)]
                         labels = [torch.cat(labels)]
-                        num_samples = labels[0].shape[0] - 100 * args.batch_size
+                        num_samples = labels[0].shape[0] - args.warmup_batches * args.batch_size
                         if not args.ipex_optimize:
                             auroc = auroc_computer(preds[0].squeeze().float(), labels[0].float())
                         else:
@@ -822,7 +828,7 @@ def _evaluate(
 
     is_rank_zero = args.distributed_training and dist.get_world_size() > 1 and dist.get_rank() == 0
     if is_rank_zero or not args.distributed_training:
-        num_samples = labels.shape[0] - 100 * args.batch_size
+        num_samples = labels.shape[0] - args.warmup_batches * args.batch_size
         if not args.ipex_optimize:
             auroc = auroc = auroc_computer(preds.squeeze().float(), labels.float())
         else:
@@ -962,14 +968,14 @@ def _train(
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
             samples, train_t = train_step(train_model, train_optimizer, iterator, it)
-            if it >= 100:
+            if it >= args.warmup_batches:
                 num_samples += samples
                 total_t += train_t
                 if enable_torch_profile:
                     p.step()
 
-            if log_freq != 0 and it % log_freq == 0 and it > 100: 
-                logger.info(f"avg training time per iter at ITER: {it}, {total_t/ (it - 100)} s")
+            if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches: 
+                logger.info(f"avg training time per iter at ITER: {it}, {total_t/ (it - args.warmup_batches)} s")
                 print_memory(f"memory usage at iter {it}")
 
             # lr_scheduler.step()
@@ -1457,13 +1463,41 @@ def main(argv: List[str]) -> None:
         model.model.over_arch = DDP(model.model.over_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
 
     if args.inductor:
+        def randomrize_crossnet_bias(bias):
+            r"""
+            the bias is initialized as all zeros and in inductor will create 1 bias for all 3 bias since they are same:
+            crossnet init:
+                self.bias: torch.nn.ParameterList = torch.nn.ParameterList(
+                    [
+                        torch.nn.Parameter(torch.nn.init.zeros_(torch.empty(in_features)))
+                        for i in range(self._num_layers)
+                    ]
+                )
+            inductor process:
+                def allocate(name):
+                    for constant_name, value in self.constants.items():
+                        if (
+                            not data.is_mkldnn
+                            and data.size() == value.size()
+                            and data.stride() == value.stride()
+                            and data.dtype == value.dtype
+                            and data.device == value.device
+                            and torch.eq(data, value).all()
+                        ):
+                            return constant_name
+            But in real world, they should be different (load from pre-trained weight), so we randomrize the bias here
+            """
+            with torch.no_grad():
+                for b in bias:
+                    b.data = torch.randn_like(b)
+        randomrize_crossnet_bias(model.model.inter_arch.crossnet.bias)
         print_memory("start StockPT ")
         if args.dtype == 'bf16':
             model.model.sparse_arch = model.model.sparse_arch.bfloat16()
-            model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.bfloat16()
+            # model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.bfloat16()
         if args.dtype == 'fp16':
             model.model.sparse_arch = model.model.sparse_arch.half()
-            model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.half()
+            # model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.half()
         model.model, optimizer = stock_pt_optimize(args, model.model, optimizer, test_dataloader)
 
     print_memory("start running model")
