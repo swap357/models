@@ -9,7 +9,7 @@ DLRM v1 Inference best known configurations with Intel® Extension for PyTorch.
 |  Inference   |    PyTorch    |       https://github.com/facebookresearch/dlrm        |           -           |         -          |
 
 # Pre-Requisite
-* Host has Intel® Data Center GPU FLex
+* Host has [Intel® Data Center GPU Flex Series](https://ark.intel.com/content/www/us/en/ark/products/series/230021/intel-data-center-gpu-flex-series.html)
 * Host has installed latest Intel® Data Center GPU Flex Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 
 # Prepare Dataset
@@ -34,18 +34,20 @@ you can get the checkpoints by running the command
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=False` (False)                                             |
-| **PLATFORM**                 | `export PLATFORM=ATS-M` (ATS-M)                                                 |
+| **PLATFORM**                 | `export PLATFORM=Flex` (Flex)                                                 |
 | **DATASET_DIR**              |                               `export DATASET_DIR=`                                  |
 | **CKPT_DIR**                 |                               `export CKPT_DIR=`                                     |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=32768`                                |
-| **PRECISION** (optional)     |                               `export PRECISION=fp16` (fp16 and fp32 forATS-M)                               |
+| **PRECISION** (optional)     |                               `export PRECISION=fp16` (fp16 and fp32 for Flex)                               |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
 6. Run `run_model.sh`
 
+> [!NOTE]
+> Refer to [CONTAINER.md](CONTAINER.md) for DLRM-v1 inference instructions using docker containers.
 ## Output
 
-Single-tile output will typicall looks like:
+Single-tile output will typically look like:
 
 ```
 accuracy 76.215 %, best 76.215 %

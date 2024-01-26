@@ -25,6 +25,7 @@ input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[CKPT_DIR]=${CKPT_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -37,13 +38,18 @@ for i in "${!input_envs[@]}"; do
 done
 
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
-if [[ "${PLATFORM}" == "PVC" ]]; then
-    echo "Only support ATS-M as platform"
+if [[ "${PLATFORM}" == "Max" ]]; then
+    echo "Only support Flex as platform"
     exit 1
-elif [[ "${PLATFORM}" == "ATS-M" ]]; then
+elif [[ "${PLATFORM}" == "Flex" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-32768}
     PRECISION=${PRECISION:-fp16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
+fi
+
+if [[ "${MULTI_TILE}" == "True" ]]; then
+    echo "Only support Single Tile."
+    exit 1
 fi
 
 if [[ ! -d "${DATASET_DIR}" ]]; then
@@ -52,11 +58,9 @@ if [[ ! -d "${DATASET_DIR}" ]]; then
 fi
 
 if [[ ! -d "${CKPT_DIR}" ]]; then
-    echo "The DATASET_DIR '${CKPT_DIR}' does not exist"
+    echo "The CKPT_DIR '${CKPT_DIR}' does not exist"
     exit 1
 fi
-
-
 
 echo 'Running with parameters:'
 echo " PLATFORM: ${PLATFORM}"
@@ -67,11 +71,11 @@ echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
 echo " MULTI_TILE: ${MULTI_TILE}"
-
+echo " OUTPUT_DIR: ${OUTPUT_DIR}"
 echo "dlrm ${PRECISION} inference plain MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
 
 # Create the output directory, if it doesn't already exist
-#mkdir -p $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
 
 sum_log_analysis() {
     if [ -f $2 ]; then
@@ -94,8 +98,8 @@ modelname=dlrm-kaggle
 
 if [[ ${MULTI_TILE} == "False" ]]; then
     rm ${OUTPUT_DIR}/${modelname}${PRECISION}_inf_t0_raw.log
-    python -u ./dlrm_s_pytorch.py --data-generation=dataset --data-set=kaggle --raw-data-file=${DATASET_DIR}/train.txt --processed-data-file=${DATASET_DIR}/kaggleAdDisplayChallenge_processed.npz --loss-function=bce --round-targets=True --mini-batch-size=${BATCH_SIZE} --arch-mlp-bot=13-512-256-64-16 --arch-mlp-top=512-256-1 --arch-sparse-feature-size=16 --max-ind-range=600000000 --print-freq=1024 --print-time --test-freq=6400 --test-mini-batch-size=${BATCH_SIZE} --num-batches=${NUM_ITERATIONS} --nepochs=10 --inference-only --use-xpu --load-model=${CKPT_DIR}/dlrm_kaggle_16.pt --${PRECISION} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t por -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python -u dlrm_s_pytorch.py --data-generation=dataset --data-set=kaggle --raw-data-file=${DATASET_DIR}/train.txt --processed-data-file=${DATASET_DIR}/kaggleAdDisplayChallenge_processed.npz --loss-function=bce --round-targets=True --mini-batch-size=${BATCH_SIZE} --arch-mlp-bot=13-512-256-64-16 --arch-mlp-top=512-256-1 --arch-sparse-feature-size=16 --max-ind-range=600000000 --print-freq=1024 --print-time --test-freq=6400 --test-mini-batch-size=${BATCH_SIZE} --num-batches=${NUM_ITERATIONS} --nepochs=10 --inference-only --use-xpu --load-model=${CKPT_DIR}/dlrm_kaggle_16.pt --${PRECISION} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
+    python common/parse_result.py -m dlrm-kaggle -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')
@@ -121,6 +125,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
-
