@@ -98,8 +98,8 @@ modelname=dlrm-kaggle
 
 if [[ ${MULTI_TILE} == "False" ]]; then
     rm ${OUTPUT_DIR}/${modelname}${PRECISION}_inf_t0_raw.log
-    python -u dlrm_s_pytorch.py --data-generation=dataset --data-set=kaggle --raw-data-file=${DATASET_DIR}/train.txt --processed-data-file=${DATASET_DIR}/kaggleAdDisplayChallenge_processed.npz --loss-function=bce --round-targets=True --mini-batch-size=${BATCH_SIZE} --arch-mlp-bot=13-512-256-64-16 --arch-mlp-top=512-256-1 --arch-sparse-feature-size=16 --max-ind-range=600000000 --print-freq=1024 --print-time --test-freq=6400 --test-mini-batch-size=${BATCH_SIZE} --num-batches=${NUM_ITERATIONS} --nepochs=10 --inference-only --use-xpu --load-model=${CKPT_DIR}/dlrm_kaggle_16.pt --${PRECISION} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python common/parse_result.py -m dlrm-kaggle -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
+    python -u ./dlrm_s_pytorch.py --data-generation=dataset --data-set=kaggle --raw-data-file=${DATASET_DIR}/train.txt --processed-data-file=${DATASET_DIR}/kaggleAdDisplayChallenge_processed.npz --loss-function=bce --round-targets=True --mini-batch-size=${BATCH_SIZE} --arch-mlp-bot=13-512-256-64-16 --arch-mlp-top=512-256-1 --arch-sparse-feature-size=16 --max-ind-range=600000000 --print-freq=1024 --print-time --test-freq=6400 --test-mini-batch-size=${BATCH_SIZE} --num-batches=${NUM_ITERATIONS} --nepochs=10 --inference-only --use-xpu --load-model=${CKPT_DIR}/dlrm_kaggle_16.pt --${PRECISION} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
     latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')

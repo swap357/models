@@ -8,12 +8,12 @@ fp32-inference:
     PLATFORM: Flex
     BATCH_SIZE: '32'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /localdisk/sramakr1/hdf5_seq_512/
+    DATASET_DIR: /nfs/site/disks/mlp_pytorch_dataset/hdf5_seq_512/
     PRECISION: FP32
     NUM_ITERATIONS: '300'
   volumes:
-    - src: /localdisk/sramakr1/hdf5_seq_512/
-      dst: /localdisk/sramakr1/hdf5_seq_512/
+    - src: /nfs/site/disks/mlp_pytorch_dataset/hdf5_seq_512/
+      dst: /nfs/site/disks/mlp_pytorch_dataset/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
 fp16-inference:
@@ -26,11 +26,11 @@ fp16-inference:
     PLATFORM: Flex
     BATCH_SIZE: '32'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /localdisk/sramakr1/hdf5_seq_512/
+    DATASET_DIR: /nfs/site/disks/mlp_pytorch_dataset/hdf5_seq_512/
     PRECISION: FP16
     NUM_ITERATIONS: '300'
   volumes:
-    - src: /localdisk/sramakr1/hdf5_seq_512/
-      dst: /localdisk/sramakr1/hdf5_seq_512/
+    - src: /nfs/site/disks/mlp_pytorch_dataset/hdf5_seq_512/
+      dst: /nfs/site/disks/mlp_pytorch_dataset/hdf5_seq_512/
     - src: /tmp
       dst: /tmp

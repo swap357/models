@@ -24,6 +24,7 @@ declare -A input_envs
 input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 input_envs[GPU_TYPE]=${GPU_TYPE}
+input_envs[PRECISION]=${PRECISION}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -49,6 +50,8 @@ if [ "${PRECISION}" == "float16" ]; then
   AMP="--amp"
 else
   AMP=""
+  echo "Only float16 PRECISION is supported."
+  exit 1
 fi
 
 echo 'Running with parameters:'
